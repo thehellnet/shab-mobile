@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">SHAB</string>
+
+    <string name="layout_main_menu_enabled">Enabled</string>
+    <string name="layout_main_menu_mapview">Map View</string>
+    <string name="layout_main_menu_config">Config</string>
 </resources>
