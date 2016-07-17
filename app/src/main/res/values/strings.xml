@@ -2,6 +2,16 @@
     <string name="app_name">SHAB</string>
 
     <string name="layout_main_menu_enabled">Enabled</string>
-    <string name="layout_main_menu_mapview">Map View</string>
+    <string name="layout_main_menu_showmap">Show map</string>
+    <string name="layout_main_menu_showinfo">Show infos</string>
+    <string name="layout_main_menu_showrawlog">Show raw log</string>
     <string name="layout_main_menu_config">Config</string>
+
+    <string name="layout_main_infos_loading">loading</string>
+
+    <string name="layout_main_infos_latitude_label">Latitude</string>
+    <string name="layout_main_infos_longitude_label">Longitude</string>
+    <string name="layout_main_infos_altitude_label">Altitude</string>
+    <string name="layout_main_infos_speed_label">Speed</string>
+    <string name="layout_main_infos_angle_label">Angle</string>
 </resources>

@@ -1,15 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context=".activity.MainActivity">
 
     <item
         android:id="@+id/menu_enabled"
         android:checkable="true"
-        android:title="@string/layout_main_menu_enabled" />
+        android:icon="@drawable/menu_enabled_off"
+        android:title="@string/layout_main_menu_enabled"
+        app:showAsAction="always" />
+
     <item
-        android:id="@+id/menu_mapview"
-        android:title="@string/layout_main_menu_mapview" />
+        android:id="@+id/menu_showmap"
+        android:icon="@drawable/menu_showmap"
+        android:title="@string/layout_main_menu_showmap"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/menu_showrawlog"
+        android:icon="@drawable/menu_showrawlog"
+        android:title="@string/layout_main_menu_showrawlog"
+        app:showAsAction="ifRoom" />
 
     <item
         android:id="@+id/menu_config"
