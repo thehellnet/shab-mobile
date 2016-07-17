@@ -12,8 +12,8 @@
         app:showAsAction="always" />
 
     <item
-        android:id="@+id/menu_maptoogle"
-        android:icon="@drawable/menu_showmap"
+        android:id="@+id/menu_maptoggle"
+        android:icon="@drawable/menu_maptoogle_showmap"
         android:title="@string/menu_main_maptoogle_showmap"
         app:showAsAction="always" />
 

@@ -24,10 +24,6 @@
             </intent-filter>
         </activity>
 
-        <activity
-            android:name=".activity.MapActivity"
-            android:label="@string/title_activity_map" />
-
         <service android:name=".service.ShabService" />
 
         <meta-data
