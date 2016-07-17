@@ -48,15 +48,16 @@ android {
 dependencies {
     compile fileTree(dir: "libs", include: ["*.jar"])
 
-    compile "com.android.support:multidex-instrumentation:1.0.1"
-    compile "com.android.support:appcompat-v7:24.0.0"
-    compile "com.android.support:multidex:1.0.1"
-    compile "com.android.support:design:24.0.0"
 
-    compile "org.apache.commons:commons-lang3:3.4"
-    compile "commons-codec:commons-codec:1.10"
 
-    compile "joda-time:joda-time:2.9.3"
 
     testCompile "junit:junit:4.12"
+    compile 'com.android.support:multidex-instrumentation:1.0.1'
+    compile 'com.android.support:appcompat-v7:24.0.0'
+    compile 'com.android.support:multidex:1.0.1'
+    compile 'com.android.support:design:24.0.0'
+    compile 'org.apache.commons:commons-lang3:3.4'
+    compile 'commons-codec:commons-codec:1.10'
+    compile 'joda-time:joda-time:2.9.3'
+    compile 'com.google.android.gms:play-services:9.2.0'
 }

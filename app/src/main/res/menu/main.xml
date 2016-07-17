@@ -8,22 +8,22 @@
         android:id="@+id/menu_enabled"
         android:checkable="true"
         android:icon="@drawable/menu_enabled_off"
-        android:title="@string/layout_main_menu_enabled"
+        android:title="@string/menu_main_enabled"
         app:showAsAction="always" />
 
     <item
-        android:id="@+id/menu_showmap"
+        android:id="@+id/menu_maptoogle"
         android:icon="@drawable/menu_showmap"
-        android:title="@string/layout_main_menu_showmap"
+        android:title="@string/menu_main_maptoogle_showmap"
         app:showAsAction="always" />
 
     <item
         android:id="@+id/menu_showrawlog"
         android:icon="@drawable/menu_showrawlog"
-        android:title="@string/layout_main_menu_showrawlog"
+        android:title="@string/menu_main_showrawlog"
         app:showAsAction="ifRoom" />
 
     <item
         android:id="@+id/menu_config"
-        android:title="@string/layout_main_menu_config" />
+        android:title="@string/menu_main_config" />
 </menu>
