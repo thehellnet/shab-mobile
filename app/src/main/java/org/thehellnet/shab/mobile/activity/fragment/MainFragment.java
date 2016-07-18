@@ -1,11 +1,5 @@
 package org.thehellnet.shab.mobile.activity.fragment;
 
-import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-
 import org.thehellnet.shab.mobile.R;
 
 /**
@@ -13,10 +7,8 @@ import org.thehellnet.shab.mobile.R;
  */
 public class MainFragment extends ShabFragment {
 
-    @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        view = inflater.inflate(R.layout.fragment_main, container, false);
-        return view;
+    protected int getLayout() {
+        return R.layout.fragment_main;
     }
 }

@@ -1,11 +1,5 @@
 package org.thehellnet.shab.mobile.activity.fragment;
 
-import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -22,11 +16,14 @@ public class MapFragment extends ShabFragment implements OnMapReadyCallback {
 
     private GoogleMap googleMap;
 
-    @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        view = inflater.inflate(R.layout.fragment_map, container, false);
-        return view;
+    protected int getLayout() {
+        return R.layout.fragment_map;
+    }
+
+    @Override
+    public Fragments getBackFragment() {
+        return Fragments.MAIN;
     }
 
     @Override

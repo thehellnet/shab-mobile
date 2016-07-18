@@ -21,6 +21,7 @@ public class MainActivity extends ShabActivity {
     private MenuItem menuConfig;
 
     private FragmentManager fragmentManager;
+    private ShabFragment currentFragment;
     private Fragments fragment;
 
     @Override
@@ -33,7 +34,7 @@ public class MainActivity extends ShabActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        replaceFragment(Fragments.MAIN);
+        replaceFragment(Fragments.MAIN, false);
     }
 
     @Override
@@ -61,6 +62,9 @@ public class MainActivity extends ShabActivity {
             case R.id.menu_settings:
                 showSettings();
                 return true;
+            case R.id.menu_about:
+                showAbout();
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -79,11 +83,29 @@ public class MainActivity extends ShabActivity {
         }
     }
 
+    @Override
+    public void onBackPressed() {
+        if (currentFragment.getBackFragment() != null) {
+            replaceFragment(currentFragment.getBackFragment());
+        } else {
+            super.onBackPressed();
+        }
+    }
+
     private void replaceFragment(Fragments newFragment) {
+        replaceFragment(newFragment, true);
+    }
+
+    private void replaceFragment(Fragments newFragment, boolean updateMenuItems) {
         fragment = newFragment;
+        currentFragment = ShabFragment.getNewFragment(newFragment);
         fragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, ShabFragment.getNewFragment(newFragment))
+                .replace(R.id.fragment_container, currentFragment)
                 .commit();
+
+        if (updateMenuItems) {
+            updateMenu();
+        }
     }
 
     private void updateMenu() {
@@ -97,10 +119,10 @@ public class MainActivity extends ShabActivity {
                 menuMapToogle.setIcon(R.drawable.menu_maptoogle_showmap);
                 menuMapToogle.setTitle(R.string.menu_main_maptoogle_showmap);
                 break;
-            case MAP:
+
+            default:
                 menuMapToogle.setIcon(R.drawable.menu_maptoogle_showinfo);
                 menuMapToogle.setTitle(R.string.menu_main_maptoogle_showinfo);
-                break;
         }
 
         menuConfig.setEnabled(!SHAB.isServiceRunning(ShabService.class));
@@ -117,25 +139,20 @@ public class MainActivity extends ShabActivity {
     }
 
     private void toogleMap() {
-        switch (fragment) {
-            case MAIN:
-                replaceFragment(Fragments.MAP);
-                updateMenu();
-                break;
-            case MAP:
-                replaceFragment(Fragments.MAIN);
-                updateMenu();
-                break;
-        }
+        replaceFragment(fragment == Fragments.MAIN ? Fragments.MAP : Fragments.MAIN);
     }
 
     private void showRawLog() {
-
+        replaceFragment(Fragments.RAWLOG);
     }
 
     private void showSettings() {
         Intent intent = new Intent(this, SettingsActivity.class);
         startActivityForResult(intent, RESULTCODE_SETTINGS);
+    }
+
+    private void showAbout() {
+        replaceFragment(Fragments.ABOUT);
     }
 
     private void showToast(String message) {

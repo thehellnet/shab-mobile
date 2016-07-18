@@ -7,5 +7,5 @@ public enum Fragments {
     MAIN,
     MAP,
     RAWLOG,
-    CONFIG
+    ABOUT
 }
