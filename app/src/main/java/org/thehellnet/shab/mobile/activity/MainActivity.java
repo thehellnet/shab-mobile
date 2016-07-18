@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import org.thehellnet.shab.mobile.R;
 import org.thehellnet.shab.mobile.SHAB;
@@ -14,6 +15,7 @@ import org.thehellnet.shab.mobile.service.ShabService;
 
 public class MainActivity extends ShabActivity {
 
+    private static final int RESULTCODE_SETTINGS = 1;
     private MenuItem menuEnabled;
     private MenuItem menuMapToogle;
     private MenuItem menuConfig;
@@ -39,7 +41,7 @@ public class MainActivity extends ShabActivity {
         getMenuInflater().inflate(R.menu.main, menu);
         menuEnabled = menu.findItem(R.id.menu_enabled);
         menuMapToogle = menu.findItem(R.id.menu_maptoggle);
-        menuConfig = menu.findItem(R.id.menu_config);
+        menuConfig = menu.findItem(R.id.menu_settings);
         updateMenu();
         return true;
     }
@@ -56,11 +58,24 @@ public class MainActivity extends ShabActivity {
             case R.id.menu_showrawlog:
                 showRawLog();
                 return true;
-            case R.id.menu_config:
-                showConfig();
+            case R.id.menu_settings:
+                showSettings();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode) {
+            case RESULTCODE_SETTINGS:
+                if (resultCode == RESULT_OK) {
+                    showToast(getString(R.string.toast_settings_saved));
+                }
+                break;
+            default:
+                super.onActivityResult(requestCode, resultCode, data);
         }
     }
 
@@ -118,9 +133,12 @@ public class MainActivity extends ShabActivity {
 
     }
 
-    private void showConfig() {
-
+    private void showSettings() {
+        Intent intent = new Intent(this, SettingsActivity.class);
+        startActivityForResult(intent, RESULTCODE_SETTINGS);
     }
 
-
+    private void showToast(String message) {
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+    }
 }

@@ -3,15 +3,17 @@ package org.thehellnet.shab.mobile.service;
 import android.Manifest;
 import android.app.Service;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.IBinder;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 
-import org.thehellnet.shab.mobile.config.C;
+import org.thehellnet.shab.mobile.config.Prefs;
 import org.thehellnet.shab.mobile.location.LocationListener;
 import org.thehellnet.shab.mobile.protocol.Protocol;
 import org.thehellnet.shab.mobile.protocol.ShabSocket;
@@ -32,6 +34,7 @@ public class ShabService extends Service implements ShabSocketCallback {
     private LocationListener locationListener;
     private Location lastLocation;
 
+    private SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
     private ShabSocket shabSocket;
     private boolean alreadyStarted = false;
 
@@ -96,7 +99,8 @@ public class ShabService extends Service implements ShabSocketCallback {
         }
 
         shabSocket = new ShabSocket(this);
-        shabSocket.start(C.SOCKET_ADDRESS, C.SOCKET_PORT);
+        shabSocket.start(prefs.getString(Prefs.SERVER_ADDRESS, Prefs.SERVER_ADDRESS_DEFAULT),
+                prefs.getInt(Prefs.SOCKET_PORT, Prefs.SOCKET_PORT_DEFAULT));
         alreadyStarted = true;
     }
 

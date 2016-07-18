@@ -3,6 +3,8 @@ package org.thehellnet.shab.mobile;
 import android.app.ActivityManager;
 import android.app.Application;
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 
 /**
  * Created by sardylan on 16/07/16.
@@ -30,5 +32,4 @@ public class SHAB extends Application {
         }
         return false;
     }
-
 }

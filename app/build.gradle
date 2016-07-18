@@ -59,5 +59,6 @@ dependencies {
     compile 'org.apache.commons:commons-lang3:3.4'
     compile 'commons-codec:commons-codec:1.10'
     compile 'joda-time:joda-time:2.9.3'
-    compile 'com.google.android.gms:play-services:9.2.0'
+    compile 'com.google.android.gms:play-services:9.2.1'
+    compile 'com.android.support:support-v4:24.0.0'
 }

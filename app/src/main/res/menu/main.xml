@@ -24,6 +24,6 @@
         app:showAsAction="ifRoom" />
 
     <item
-        android:id="@+id/menu_config"
-        android:title="@string/menu_main_config" />
+        android:id="@+id/menu_settings"
+        android:title="@string/menu_main_settings" />
 </menu>

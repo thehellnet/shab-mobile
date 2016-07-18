@@ -26,7 +26,7 @@ public final class Protocol {
         return String.format(Locale.getDefault(), "%s|%s|%s|%s",
                 P.CLIENT,
                 DeviceIdentifier.getDeviceId(),
-                prefs.getString(Prefs.DEVICE_NAME, ""),
+                prefs.getString(Prefs.NAME, ""),
                 DATE_TIME_FORMATTER.print(new DateTime()));
     }
 

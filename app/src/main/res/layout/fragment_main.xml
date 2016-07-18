@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -26,7 +27,7 @@
             <TextView
                 android:id="@+id/infos_latitude_value"
                 style="@style/main_infos_value"
-                android:text="@string/layout_main_infos_loading" />
+                android:text="@string/layout_loading" />
         </RelativeLayout>
 
         <RelativeLayout
@@ -41,7 +42,7 @@
             <TextView
                 android:id="@+id/infos_longitude_value"
                 style="@style/main_infos_value"
-                android:text="@string/layout_main_infos_loading" />
+                android:text="@string/layout_loading" />
         </RelativeLayout>
 
         <RelativeLayout
@@ -56,7 +57,7 @@
             <TextView
                 android:id="@+id/infos_altitude_value"
                 style="@style/main_infos_value"
-                android:text="@string/layout_main_infos_loading" />
+                android:text="@string/layout_loading" />
         </RelativeLayout>
 
         <RelativeLayout
@@ -71,7 +72,7 @@
             <TextView
                 android:id="@+id/infos_speed_value"
                 style="@style/main_infos_value"
-                android:text="@string/layout_main_infos_loading" />
+                android:text="@string/layout_loading" />
         </RelativeLayout>
 
         <RelativeLayout
@@ -86,7 +87,7 @@
             <TextView
                 android:id="@+id/infos_angle_value"
                 style="@style/main_infos_value"
-                android:text="@string/layout_main_infos_loading" />
+                android:text="@string/layout_loading" />
         </RelativeLayout>
     </LinearLayout>
 

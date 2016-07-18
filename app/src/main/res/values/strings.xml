@@ -5,14 +5,25 @@
     <string name="menu_main_maptoogle_showmap">Show map</string>
     <string name="menu_main_maptoogle_showinfo">Show info</string>
     <string name="menu_main_showrawlog">Show raw log</string>
-    <string name="menu_main_config">Config</string>
+    <string name="menu_main_settings">Settings</string>
 
-    <string name="layout_main_infos_loading">loading</string>
+    <string name="layout_loading">loading</string>
 
     <string name="layout_main_infos_latitude_label">Latitude</string>
     <string name="layout_main_infos_longitude_label">Longitude</string>
     <string name="layout_main_infos_altitude_label">Altitude</string>
     <string name="layout_main_infos_speed_label">Speed</string>
     <string name="layout_main_infos_angle_label">Angle</string>
-    <string name="title_activity_map">Map</string>
+
+    <string name="title_activity_settings">Settings</string>
+
+    <string name="layout_settings_reset_description">Reset</string>
+    <string name="layout_settings_button_save">Save Settings</string>
+
+    <string name="layout_settings_server_address_label">Server address</string>
+    <string name="layout_settings_server_port_label">Server port</string>
+    <string name="layout_settings_name_label">Name</string>
+
+    <string name="toast_settings_saved">Settings saved</string>
+
 </resources>
