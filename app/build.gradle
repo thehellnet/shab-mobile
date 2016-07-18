@@ -6,7 +6,7 @@ android {
 
     dexOptions {
         incremental true
-        javaMaxHeapSize "4g"
+        javaMaxHeapSize "8g"
     }
 
     packagingOptions {

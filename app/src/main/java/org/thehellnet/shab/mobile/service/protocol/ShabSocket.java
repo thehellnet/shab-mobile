@@ -1,4 +1,4 @@
-package org.thehellnet.shab.mobile.protocol;
+package org.thehellnet.shab.mobile.service.protocol;
 
 import android.util.Log;
 
@@ -41,7 +41,7 @@ public class ShabSocket {
                     socket = new Socket();
                     socket.connect(new InetSocketAddress(address, port), SOCKET_TIMEOUT);
                     reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                    writer = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()));
+                    writer = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()), true);
                 } catch (IOException e) {
                     Log.e(TAG, e.getMessage());
                     callback.disconnected();
@@ -74,10 +74,10 @@ public class ShabSocket {
 
     public void stop() {
         keepRunning = false;
-        if (writer != null) {
-            writer.close();
-        }
         try {
+            if (writer != null) {
+                writer.close();
+            }
             if (reader != null) {
                 reader.close();
             }
@@ -105,8 +105,7 @@ public class ShabSocket {
             return;
         }
         lastLine = line;
-        writer.print(line);
-        writer.print("\n");
+        writer.println(lastLine);
         writer.flush();
     }
 }

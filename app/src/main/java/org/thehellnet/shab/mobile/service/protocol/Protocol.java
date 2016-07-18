@@ -1,4 +1,4 @@
-package org.thehellnet.shab.mobile.protocol;
+package org.thehellnet.shab.mobile.service.protocol;
 
 import android.content.SharedPreferences;
 import android.location.Location;

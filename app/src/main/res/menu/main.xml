@@ -28,6 +28,10 @@
         android:title="@string/menu_main_settings" />
 
     <item
+        android:id="@+id/menu_permissions"
+        android:title="@string/menu_main_permissions" />
+
+    <item
         android:id="@+id/menu_about"
         android:title="@string/menu_main_about" />
 </menu>

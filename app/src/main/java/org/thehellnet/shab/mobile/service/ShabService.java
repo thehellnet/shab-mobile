@@ -13,16 +13,27 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 
+import org.thehellnet.shab.mobile.config.I;
 import org.thehellnet.shab.mobile.config.Prefs;
 import org.thehellnet.shab.mobile.location.LocationListener;
-import org.thehellnet.shab.mobile.protocol.Protocol;
-import org.thehellnet.shab.mobile.protocol.ShabSocket;
-import org.thehellnet.shab.mobile.protocol.ShabSocketCallback;
+import org.thehellnet.shab.mobile.service.protocol.Protocol;
+import org.thehellnet.shab.mobile.service.protocol.ShabSocket;
+import org.thehellnet.shab.mobile.service.protocol.ShabSocketCallback;
 
 /**
  * Created by sardylan on 16/07/16.
  */
 public class ShabService extends Service implements ShabSocketCallback {
+
+    private class GpsLocationListener extends LocationListener {
+
+        @Override
+        public void onLocationChanged(Location location) {
+            lastLocation = location;
+            shabSocket.send(Protocol.clientCommand(lastLocation));
+            sendUpdateLocalPosition();
+        }
+    }
 
     private static final String TAG = ShabService.class.getSimpleName();
     private static final int LOCATION_INTERVAL = 1000;
@@ -31,22 +42,12 @@ public class ShabService extends Service implements ShabSocketCallback {
     private final Object SYNC_START = new Object();
 
     private LocationManager locationManager;
-    private LocationListener locationListener;
+    private LocationListener locationListener = new GpsLocationListener();
     private Location lastLocation;
 
-    private SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+    private SharedPreferences prefs;
     private ShabSocket shabSocket;
     private boolean alreadyStarted = false;
-
-    public ShabService() {
-        locationListener = new LocationListener() {
-            @Override
-            public void onLocationChanged(Location location) {
-                lastLocation = location;
-                shabSocket.send(Protocol.clientCommand(lastLocation));
-            }
-        };
-    }
 
     @Nullable
     @Override
@@ -59,10 +60,13 @@ public class ShabService extends Service implements ShabSocketCallback {
         Log.d(TAG, "onStartCommand");
 
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+        prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 
-        synchronized (SYNC_START) {
-            if (!alreadyStarted) {
-                start();
+        if (!alreadyStarted) {
+            synchronized (SYNC_START) {
+                if (!alreadyStarted) {
+                    start();
+                }
             }
         }
 
@@ -102,6 +106,7 @@ public class ShabService extends Service implements ShabSocketCallback {
         shabSocket.start(prefs.getString(Prefs.SERVER_ADDRESS, Prefs.SERVER_ADDRESS_DEFAULT),
                 prefs.getInt(Prefs.SOCKET_PORT, Prefs.SOCKET_PORT_DEFAULT));
         alreadyStarted = true;
+        sendUpdateServiceStatus();
     }
 
     private void stop() {
@@ -110,8 +115,22 @@ public class ShabService extends Service implements ShabSocketCallback {
             locationManager.removeUpdates(locationListener);
         }
 
-        shabSocket.stop();
-        shabSocket = null;
+        if (shabSocket != null) {
+            shabSocket.stop();
+            shabSocket = null;
+        }
         alreadyStarted = false;
+        sendUpdateServiceStatus();
+    }
+
+    private void sendUpdateServiceStatus() {
+        Intent intent = new Intent(I.UPDATE_SERVICE_STATUS);
+        sendBroadcast(intent);
+    }
+
+    private void sendUpdateLocalPosition() {
+        Intent intent = new Intent(I.UPDATE_LOCAL_POSITION);
+        intent.putExtra("location", lastLocation);
+        sendBroadcast(intent);
     }
 }

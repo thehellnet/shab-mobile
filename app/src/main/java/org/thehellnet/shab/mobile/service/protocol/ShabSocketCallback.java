@@ -1,4 +1,4 @@
-package org.thehellnet.shab.mobile.protocol;
+package org.thehellnet.shab.mobile.service.protocol;
 
 /**
  * Created by sardylan on 16/07/16.

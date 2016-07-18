@@ -1,21 +1,31 @@
 package org.thehellnet.shab.mobile.activity;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentManager;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import org.thehellnet.shab.mobile.Permissions;
 import org.thehellnet.shab.mobile.R;
 import org.thehellnet.shab.mobile.SHAB;
 import org.thehellnet.shab.mobile.activity.fragment.Fragments;
 import org.thehellnet.shab.mobile.activity.fragment.ShabFragment;
+import org.thehellnet.shab.mobile.config.I;
 import org.thehellnet.shab.mobile.service.ShabService;
 
 public class MainActivity extends ShabActivity {
 
-    private static final int RESULTCODE_SETTINGS = 1;
+    private static final int REQUESTCODE_SETTINGS = 1;
+    private static final int REQUESTCODE_PERMISSIONS = 2;
+
     private MenuItem menuEnabled;
     private MenuItem menuMapToogle;
     private MenuItem menuConfig;
@@ -62,6 +72,9 @@ public class MainActivity extends ShabActivity {
             case R.id.menu_settings:
                 showSettings();
                 return true;
+            case R.id.menu_permissions:
+                requestPermissions();
+                return true;
             case R.id.menu_about:
                 showAbout();
                 return true;
@@ -73,9 +86,9 @@ public class MainActivity extends ShabActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode) {
-            case RESULTCODE_SETTINGS:
+            case REQUESTCODE_SETTINGS:
                 if (resultCode == RESULT_OK) {
-                    showToast(getString(R.string.toast_settings_saved));
+                    showToast(R.string.toast_settings_saved);
                 }
                 break;
             default:
@@ -90,6 +103,25 @@ public class MainActivity extends ShabActivity {
         } else {
             super.onBackPressed();
         }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if (requestCode != REQUESTCODE_PERMISSIONS) {
+            super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+            return;
+        }
+        for (int result : grantResults) {
+            if (result != PackageManager.PERMISSION_GRANTED) {
+                showToast(R.string.toast_permissions_denied);
+                break;
+            }
+        }
+        showToast(R.string.toast_permissions_granted);
+    }
+
+    private void requestPermissions() {
+        ActivityCompat.requestPermissions(this, Permissions.PERMISSIONS, REQUESTCODE_PERMISSIONS);
     }
 
     private void replaceFragment(Fragments newFragment) {
@@ -148,11 +180,15 @@ public class MainActivity extends ShabActivity {
 
     private void showSettings() {
         Intent intent = new Intent(this, SettingsActivity.class);
-        startActivityForResult(intent, RESULTCODE_SETTINGS);
+        startActivityForResult(intent, REQUESTCODE_SETTINGS);
     }
 
     private void showAbout() {
         replaceFragment(Fragments.ABOUT);
+    }
+
+    private void showToast(int resId) {
+        showToast(getString(resId));
     }
 
     private void showToast(String message) {
