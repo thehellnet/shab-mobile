@@ -13,8 +13,6 @@ import org.thehellnet.shab.mobile.R;
  */
 public class MainFragment extends ShabFragment {
 
-    private View view;
-
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
