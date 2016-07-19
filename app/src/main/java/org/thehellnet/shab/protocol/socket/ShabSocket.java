@@ -1,21 +1,17 @@
-package org.thehellnet.shab.mobile.service.protocol;
-
-import android.util.Log;
+package org.thehellnet.shab.protocol.socket;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.net.InetSocketAddress;
 import java.net.Socket;
 
 /**
- * Created by sardylan on 16/07/16.
+ * Created by sardylan on 19/07/16.
  */
 public class ShabSocket {
 
-    private static final String TAG = ShabSocket.class.getSimpleName();
     private static final int SOCKET_TIMEOUT = 5000;
 
     private ShabSocketCallback callback;
@@ -37,13 +33,11 @@ public class ShabSocket {
         thread = new Thread(new Runnable() {
             @Override
             public void run() {
+                socket = new Socket();
                 try {
-                    socket = new Socket();
-                    socket.connect(new InetSocketAddress(address, port), SOCKET_TIMEOUT);
                     reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                     writer = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()), true);
                 } catch (IOException e) {
-                    Log.e(TAG, e.getMessage());
                     callback.disconnected();
                     return;
                 }
@@ -61,12 +55,12 @@ public class ShabSocket {
                             callback.newLine(lastLine);
                         }
                     }
-                } catch (IOException e) {
-                    Log.w(TAG, e.getMessage());
+                } catch (IOException ignored) {
                 }
 
                 callback.disconnected();
             }
+
         });
         thread.setDaemon(true);
         thread.start();
@@ -84,15 +78,14 @@ public class ShabSocket {
             if (socket != null) {
                 socket.close();
             }
-        } catch (IOException e) {
-            Log.w(TAG, e.getMessage());
+        } catch (IOException ignored) {
         }
+
         if (thread != null) {
             thread.interrupt();
             try {
                 thread.join();
-            } catch (InterruptedException e) {
-                Log.w(TAG, "Thread interrupted");
+            } catch (InterruptedException ignored) {
             }
         }
     }

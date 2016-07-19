@@ -1,7 +1,7 @@
-package org.thehellnet.shab.mobile.service.protocol;
+package org.thehellnet.shab.protocol.socket;
 
 /**
- * Created by sardylan on 16/07/16.
+ * Created by sardylan on 19/07/16.
  */
 public interface ShabSocketCallback {
 

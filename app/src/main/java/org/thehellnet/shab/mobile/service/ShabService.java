@@ -16,9 +16,13 @@ import android.util.Log;
 import org.thehellnet.shab.mobile.config.I;
 import org.thehellnet.shab.mobile.config.Prefs;
 import org.thehellnet.shab.mobile.location.LocationListener;
-import org.thehellnet.shab.mobile.service.protocol.Protocol;
-import org.thehellnet.shab.mobile.service.protocol.ShabSocket;
-import org.thehellnet.shab.mobile.service.protocol.ShabSocketCallback;
+import org.thehellnet.shab.protocol.DataKeeper;
+import org.thehellnet.shab.protocol.bean.Client;
+import org.thehellnet.shab.protocol.command.ClientUpdate;
+import org.thehellnet.shab.protocol.command.Command;
+import org.thehellnet.shab.protocol.command.Parser;
+import org.thehellnet.shab.protocol.socket.ShabSocket;
+import org.thehellnet.shab.protocol.socket.ShabSocketCallback;
 
 /**
  * Created by sardylan on 16/07/16.
@@ -30,7 +34,10 @@ public class ShabService extends Service implements ShabSocketCallback {
         @Override
         public void onLocationChanged(Location location) {
             lastLocation = location;
-            shabSocket.send(Protocol.clientCommand(lastLocation));
+            dataKeeper.getClient().setPosition(lastLocation.getLatitude(),
+                    lastLocation.getLongitude(),
+                    lastLocation.getAltitude());
+            shabSocket.send(ClientUpdate.serialize(dataKeeper.getClient()));
             sendUpdateLocalPosition();
         }
     }
@@ -48,6 +55,8 @@ public class ShabService extends Service implements ShabSocketCallback {
     private SharedPreferences prefs;
     private ShabSocket shabSocket;
     private boolean alreadyStarted = false;
+
+    private DataKeeper dataKeeper = new DataKeeper();
 
     @Nullable
     @Override
@@ -82,12 +91,19 @@ public class ShabService extends Service implements ShabSocketCallback {
 
     @Override
     public void connected() {
-        shabSocket.send(Protocol.clientCommand());
+        shabSocket.send(ClientUpdate.serialize(dataKeeper.getClient()));
     }
 
     @Override
     public void newLine(String line) {
         Log.i(TAG, String.format("New line from socket: %s", line));
+        Command command = Parser.parseRawCommand(line);
+        switch (command) {
+            case CLIENT_UPDATE:
+                Client client = ClientUpdate.parse(line);
+                sendUpdateClientPosition(client);
+                break;
+        }
     }
 
     @Override
@@ -131,6 +147,12 @@ public class ShabService extends Service implements ShabSocketCallback {
     private void sendUpdateLocalPosition() {
         Intent intent = new Intent(I.UPDATE_LOCAL_POSITION);
         intent.putExtra("location", lastLocation);
+        sendBroadcast(intent);
+    }
+
+    private void sendUpdateClientPosition(Client client) {
+        Intent intent = new Intent(I.UPDATE_CLIENT_POSITION);
+        intent.putExtra("client", client);
         sendBroadcast(intent);
     }
 }
