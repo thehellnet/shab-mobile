@@ -23,6 +23,10 @@
     <string name="layout_settings_server_port_label">Server port</string>
     <string name="layout_settings_name_label">Name</string>
 
+    <string name="layout_map_auto">Auto bounds and zoom</string>
+    <string name="layout_map_type_normal">Map</string>
+    <string name="layout_map_type_satellite">Earth</string>
+
     <string name="toast_settings_saved">Settings saved</string>
     <string name="toast_permissions_granted">Permissions granted</string>
     <string name="toast_permissions_denied">Permissions denied</string>

@@ -20,10 +20,18 @@ import org.thehellnet.shab.mobile.config.I;
 import org.thehellnet.shab.mobile.config.Prefs;
 import org.thehellnet.shab.mobile.location.LocationListener;
 import org.thehellnet.shab.mobile.utility.DeviceIdentifier;
+import org.thehellnet.shab.protocol.LineFactory;
 import org.thehellnet.shab.protocol.Position;
 import org.thehellnet.shab.protocol.ShabContext;
+import org.thehellnet.shab.protocol.entity.Client;
+import org.thehellnet.shab.protocol.exception.AbstractProtocolException;
 import org.thehellnet.shab.protocol.line.ClientConnectLine;
+import org.thehellnet.shab.protocol.line.ClientDisconnectLine;
 import org.thehellnet.shab.protocol.line.ClientUpdateLine;
+import org.thehellnet.shab.protocol.line.HabImageLine;
+import org.thehellnet.shab.protocol.line.HabPositionLine;
+import org.thehellnet.shab.protocol.line.HabTelemetryLine;
+import org.thehellnet.shab.protocol.line.Line;
 import org.thehellnet.shab.protocol.socket.ShabSocket;
 import org.thehellnet.shab.protocol.socket.ShabSocketCallback;
 
@@ -37,7 +45,7 @@ public class ShabService extends Service implements ShabSocketCallback {
         @Override
         public void onLocationChanged(Location location) {
             if (!useGpsInsteadNetwork) {
-                newLocation(location);
+                handleNewLocationFromProviders(location);
             }
         }
     }
@@ -46,7 +54,7 @@ public class ShabService extends Service implements ShabSocketCallback {
 
         @Override
         public void onLocationChanged(Location location) {
-            newLocation(location);
+            handleNewLocationFromProviders(location);
         }
     }
 
@@ -55,29 +63,16 @@ public class ShabService extends Service implements ShabSocketCallback {
         @Override
         public void onGpsStatusChanged(int status) {
             switch (status) {
-                case GpsStatus.GPS_EVENT_STARTED:
-                    Log.d(TAG, "onGpsStatusChanged: GPS_EVENT_STARTED");
-                    break;
-                case GpsStatus.GPS_EVENT_STOPPED:
-                    Log.d(TAG, "onGpsStatusChanged: GPS_EVENT_STOPPED");
-                    break;
-                case GpsStatus.GPS_EVENT_FIRST_FIX:
-                    Log.d(TAG, "onGpsStatusChanged: GPS_EVENT_FIRST_FIX");
-                    break;
                 case GpsStatus.GPS_EVENT_SATELLITE_STATUS:
-                    Log.d(TAG, "onGpsStatusChanged: GPS_EVENT_SATELLITE_STATUS");
                     GpsStatus gpsStatus = locationManager.getGpsStatus(null);
-
                     int usedSatellites = 0;
                     for (GpsSatellite gpsSatellite : gpsStatus.getSatellites()) {
                         if (gpsSatellite.usedInFix()) {
                             usedSatellites++;
                         }
                     }
-
-                    Log.d(TAG, String.format("Used satellited: %d", usedSatellites));
-
                     useGpsInsteadNetwork = usedSatellites >= 3;
+                    Log.d(TAG, String.format("Used satellited: %d - useGpsInsteadNetwork: %s", usedSatellites, useGpsInsteadNetwork));
                     break;
             }
         }
@@ -86,8 +81,10 @@ public class ShabService extends Service implements ShabSocketCallback {
     private static final String TAG = ShabService.class.getSimpleName();
     private static final int LOCATION_INTERVAL = 1000;
     private static final float LOCATION_DISTANCE = 10f;
+    private static final int POSITION_SEND_INTERVAL = 5;
 
     private final Object SYNC_START = new Object();
+    private final Object SYNC_LINEPARSE = new Object();
 
     private LocationManager locationManager;
     private LocationListener gpsLocationListener = new GpsLocationListener();
@@ -99,8 +96,8 @@ public class ShabService extends Service implements ShabSocketCallback {
     private ShabSocket shabSocket;
     private boolean alreadyStarted = false;
 
-    private ShabContext shabContext = new ShabContext();
-    private DateTime lastLocalPositionSend = new DateTime();
+    private ShabContext shabContext = ShabContext.getInstance();
+    private DateTime lastLocalPositionSend;
 
     @Nullable
     @Override
@@ -132,6 +129,8 @@ public class ShabService extends Service implements ShabSocketCallback {
 
     @Override
     public void connected() {
+        broadcastSocketStatus(true);
+
         ClientConnectLine line = new ClientConnectLine();
         line.setId(DeviceIdentifier.getDeviceId());
         line.setName(prefs.getString(Prefs.NAME, Prefs.NAME_DEFAULT));
@@ -141,23 +140,43 @@ public class ShabService extends Service implements ShabSocketCallback {
     }
 
     @Override
-    public void newLine(String line) {
-        Log.i(TAG, String.format("New line from socket: %s", line));
-//        Command command = Parser.parseRawCommand(line);
-//        switch (command) {
-//            case CLIENT_UPDATE:
-//                Client client = ClientUpdate.parse(line);
-//                sendUpdateClientPosition(client);
-//                break;
-//        }
+    public void newLine(String rawLine) {
+        Log.d(TAG, String.format("New line from socket: %s", rawLine));
+
+        Line line;
+        try {
+            line = LineFactory.parse(rawLine);
+        } catch (AbstractProtocolException e) {
+            e.printStackTrace();
+            return;
+        }
+
+        synchronized (SYNC_LINEPARSE) {
+            if (line instanceof ClientConnectLine) {
+                doClientConnected((ClientConnectLine) line);
+            } else if (line instanceof ClientUpdateLine) {
+                doClientUpdate((ClientUpdateLine) line);
+            } else if (line instanceof ClientDisconnectLine) {
+                doClientDisconnected((ClientDisconnectLine) line);
+            } else if (line instanceof HabPositionLine) {
+                doHabPosition((HabPositionLine) line);
+            } else if (line instanceof HabImageLine) {
+                doHabImage((HabImageLine) line);
+            } else if (line instanceof HabTelemetryLine) {
+                doHabTelemetry((HabTelemetryLine) line);
+            }
+        }
     }
 
     @Override
     public void disconnected() {
+        broadcastSocketStatus(false);
         stop();
     }
 
     private void start() {
+        shabContext.clear();
+
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 
@@ -189,11 +208,14 @@ public class ShabService extends Service implements ShabSocketCallback {
             shabSocket = null;
         }
 
+        shabContext.clear();
+        lastLocalPositionSend = null;
+
         alreadyStarted = false;
         broadcastServiceStatus();
     }
 
-    private void newLocation(Location location) {
+    private void handleNewLocationFromProviders(Location location) {
         Position localClientPosition = new Position();
         localClientPosition.setLatitude(location.getLatitude());
         localClientPosition.setLongitude(location.getLongitude());
@@ -202,7 +224,8 @@ public class ShabService extends Service implements ShabSocketCallback {
 
         broadcastLocalPosition();
 
-        if (lastLocalPositionSend.plusSeconds(5).isBeforeNow()) {
+        if (lastLocalPositionSend == null
+                || lastLocalPositionSend.plusSeconds(POSITION_SEND_INTERVAL).isBeforeNow()) {
             sendLocalPosition();
             lastLocalPositionSend = new DateTime();
         }
@@ -226,9 +249,72 @@ public class ShabService extends Service implements ShabSocketCallback {
         sendBroadcast(intent);
     }
 
+    private void broadcastSocketStatus(boolean status) {
+        Intent intent = new Intent(I.UPDATE_SOCKET_STATUS);
+        intent.putExtra("status", status);
+        sendBroadcast(intent);
+    }
+
     private void broadcastLocalPosition() {
         Intent intent = new Intent(I.UPDATE_LOCAL_POSITION);
         intent.putExtra("position", shabContext.getLocalClient().getPosition());
+        sendBroadcast(intent);
+    }
+
+    private void doClientConnected(ClientConnectLine line) {
+        Client client = new Client();
+        client.setId(line.getId());
+        client.setName(line.getName());
+        shabContext.getRemoteClients().add(client);
+
+        Intent intent = new Intent(I.COMMAND_CLIENT_CONNECT);
+        intent.putExtra("id", client.getId());
+        sendBroadcast(intent);
+    }
+
+    private void doClientUpdate(ClientUpdateLine line) {
+        Log.i(TAG, String.format("Client %s Update", line.getId()));
+
+        Client client = shabContext.findRemoteClientById(line.getId());
+        if (client == null) {
+            return;
+        }
+        int index = shabContext.getRemoteClients().lastIndexOf(client);
+
+        Position position = new Position(line.getLatitude(), line.getLongitude(), line.getAltitude());
+        client.setPosition(position);
+
+        shabContext.getRemoteClients().set(index, client);
+
+        Intent intent = new Intent(I.COMMAND_CLIENT_UPDATE);
+        intent.putExtra("id", client.getId());
+        sendBroadcast(intent);
+    }
+
+    private void doClientDisconnected(ClientDisconnectLine line) {
+        Client client = shabContext.findRemoteClientById(line.getId());
+        if (client == null) {
+            return;
+        }
+        shabContext.getRemoteClients().remove(client);
+
+        Intent intent = new Intent(I.COMMAND_CLIENT_DISCONNECT);
+        intent.putExtra("id", client.getId());
+        sendBroadcast(intent);
+    }
+
+    private void doHabPosition(HabPositionLine line) {
+        Intent intent = new Intent(I.COMMAND_HAB_POSITION);
+        sendBroadcast(intent);
+    }
+
+    private void doHabImage(HabImageLine line) {
+        Intent intent = new Intent(I.COMMAND_HAB_IMAGE);
+        sendBroadcast(intent);
+    }
+
+    private void doHabTelemetry(HabTelemetryLine line) {
+        Intent intent = new Intent(I.COMMAND_HAB_TELEMETRY);
         sendBroadcast(intent);
     }
 }

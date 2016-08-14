@@ -7,7 +7,7 @@ public interface ShabSocketCallback {
 
     void connected();
 
-    void newLine(String line);
+    void newLine(String rawLine);
 
     void disconnected();
 }

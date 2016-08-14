@@ -3,6 +3,7 @@ package org.thehellnet.shab.protocol;
 import org.thehellnet.shab.protocol.entity.Client;
 import org.thehellnet.shab.protocol.entity.Hab;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -10,9 +11,36 @@ import java.util.List;
  */
 public class ShabContext {
 
+    private static ShabContext instance;
+
     private Client localClient = new Client();
-    private Hab hab;
-    private List<Client> remoteClients;
+    private Hab hab = new Hab();
+    private List<Client> remoteClients = new ArrayList<>();
+
+    private ShabContext() {
+    }
+
+    public static ShabContext getInstance() {
+        if (instance == null) {
+            instance = new ShabContext();
+        }
+        return instance;
+    }
+
+    public void clear() {
+        localClient.setPosition(null);
+        hab.setPosition(null);
+        remoteClients.clear();
+    }
+
+    public Client findRemoteClientById(String id) {
+        for (Client client : remoteClients) {
+            if (client.getId().equals(id)) {
+                return client;
+            }
+        }
+        return null;
+    }
 
     public Client getLocalClient() {
         return localClient;

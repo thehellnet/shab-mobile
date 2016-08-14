@@ -1,7 +1,9 @@
 package org.thehellnet.shab.mobile.activity.fragment;
 
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -14,6 +16,7 @@ import android.view.ViewGroup;
 public abstract class ShabFragment extends Fragment {
 
     protected View view;
+    protected SharedPreferences prefs;
 
     public static ShabFragment getNewFragment(Fragments item) {
         switch (item) {
@@ -39,8 +42,26 @@ public abstract class ShabFragment extends Fragment {
         return view;
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        prefs = PreferenceManager.getDefaultSharedPreferences(getContext());
+
+        initElements();
+        setOnClickListeners();
+    }
+
     public Fragments getBackFragment() {
         return null;
+    }
+
+    protected void initElements() {
+
+    }
+
+    protected void setOnClickListeners() {
+
     }
 
     protected abstract int getLayout();
