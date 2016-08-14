@@ -1,6 +1,7 @@
 package org.thehellnet.shab.mobile.service;
 
 import android.Manifest;
+import android.app.Notification;
 import android.app.Service;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -72,7 +73,7 @@ public class ShabService extends Service implements ShabSocketCallback {
                         }
                     }
                     useGpsInsteadNetwork = usedSatellites >= 3;
-                    Log.d(TAG, String.format("Used satellited: %d - useGpsInsteadNetwork: %s", usedSatellites, useGpsInsteadNetwork));
+//                    Log.d(TAG, String.format("Used satellited: %d - useGpsInsteadNetwork: %s", usedSatellites, useGpsInsteadNetwork));
                     break;
             }
         }
@@ -116,6 +117,14 @@ public class ShabService extends Service implements ShabSocketCallback {
                 }
             }
         }
+
+        Notification notification = new Notification.Builder(getApplicationContext())
+                .setContentTitle("SHAB Service")
+                .setContentText("SHAB is running")
+                .setAutoCancel(true)
+                .setOngoing(true)
+                .build();
+        startForeground(1, notification);
 
         return START_STICKY;
     }
