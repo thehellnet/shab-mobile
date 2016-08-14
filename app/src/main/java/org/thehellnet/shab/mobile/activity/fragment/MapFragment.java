@@ -14,17 +14,15 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import org.thehellnet.shab.mobile.R;
 import org.thehellnet.shab.mobile.config.I;
-import org.thehellnet.shab.mobile.utility.MapClient;
-import org.thehellnet.shab.protocol.bean.Client;
-
-import java.util.ArrayList;
-import java.util.List;
+import org.thehellnet.shab.protocol.Position;
 
 /**
  * Created by sardylan on 17/07/16.
@@ -35,12 +33,14 @@ public class MapFragment extends ShabFragment implements OnMapReadyCallback {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            Location location = (Location) intent.getExtras().get("location");
-            if (location != null) {
-                localPosition = new LatLng(location.getAltitude(), location.getLongitude());
-                localMarker.setPosition(localPosition);
-                googleMap.moveCamera(CameraUpdateFactory.newLatLng(localPosition));
+            Position position = (Position) intent.getExtras().get("position");
+            if (position == null) {
+                return;
             }
+
+            localPosition = new LatLng(position.getLatitude(), position.getLongitude());
+            localMarker.setPosition(localPosition);
+            updateMapBoundsAndZoom();
         }
     }
 
@@ -48,39 +48,20 @@ public class MapFragment extends ShabFragment implements OnMapReadyCallback {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            Client client = (Client) intent.getExtras().get("client");
-            if (client == null) {
-                return;
-            }
-
-            for (int i = 0; i < mapClients.size(); i++) {
-                if (mapClients.get(i).id.equals(client.getId())) {
-                    MapClient mapClient = mapClients.get(i);
-                    mapClient.name = client.getName();
-                    mapClient.position = new LatLng(client.getPosition().getLatitude(), client.getPosition().getLongitude());
-                    mapClient.marker.setPosition(mapClient.position);
-                    mapClient.marker.setTitle(mapClient.name);
-                    return;
-                }
-            }
-
-            MapClient mapClient = new MapClient();
-            mapClient.id = client.getId();
-            mapClient.name = client.getName();
-            mapClient.position = new LatLng(client.getPosition().getLatitude(), client.getPosition().getLongitude());
-            mapClient.marker = googleMap.addMarker(new MarkerOptions().position(localPosition).title(mapClient.name));
-            mapClients.add(mapClient);
         }
     }
+
+    private static final LatLng DEFAULT_POSITION = new LatLng(39.44510959999999, 9.540954499999998);
 
     private UpdateLocalPositionReceiver updateLocalPositionReceiver;
     private UpdateClientPositionReceiver updateClientPositionReceiver;
 
     private GoogleMap googleMap;
+
     private LatLng localPosition;
     private Marker localMarker;
 
-    private List<MapClient> mapClients = new ArrayList<>();
+    private boolean autoBoundAndZoom = true;
 
     @Override
     protected int getLayout() {
@@ -118,28 +99,45 @@ public class MapFragment extends ShabFragment implements OnMapReadyCallback {
     public void onMapReady(GoogleMap googleMapObject) {
         googleMap = googleMapObject;
 
-        double latitude = 0;
-        double longitude = 0;
-
         if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            LocationManager locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
-            Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-            if (location != null) {
-                latitude = location.getLatitude();
-                longitude = location.getLongitude();
-            }
-
             updateLocalPositionReceiver = new UpdateLocalPositionReceiver();
             getContext().registerReceiver(updateLocalPositionReceiver, new IntentFilter(I.UPDATE_LOCAL_POSITION));
-        }
 
-        localPosition = new LatLng(latitude, longitude);
-        localMarker = googleMap.addMarker(
-                new MarkerOptions().position(localPosition).title("Local"));
-        googleMap.moveCamera(CameraUpdateFactory.newLatLng(localPosition));
+            LocationManager locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
+            Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+
+            if (location != null) {
+                localPosition = new LatLng(location.getLatitude(), location.getLongitude());
+                MarkerOptions markerOptions = new MarkerOptions();
+                markerOptions.position(localPosition);
+                markerOptions.title("Local");
+                markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.map_marker_green));
+                localMarker = googleMap.addMarker(markerOptions);
+                updateMapBoundsAndZoom();
+            }
+        }
 
         updateClientPositionReceiver = new UpdateClientPositionReceiver();
         getContext().registerReceiver(updateClientPositionReceiver, new IntentFilter(I.UPDATE_CLIENT_POSITION));
+    }
+
+    private void updateMapBoundsAndZoom() {
+        if (!autoBoundAndZoom) {
+            return;
+        }
+
+        LatLngBounds.Builder builder = new LatLngBounds.Builder();
+        boolean useDefault = true;
+
+        if (localPosition != null) {
+            useDefault = false;
+            builder.include(localPosition);
+        }
+
+        if (useDefault) {
+            builder.include(DEFAULT_POSITION);
+        }
+        googleMap.moveCamera(CameraUpdateFactory.newLatLngBounds(builder.build(), 30));
     }
 }

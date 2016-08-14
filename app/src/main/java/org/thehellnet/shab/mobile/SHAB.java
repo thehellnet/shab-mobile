@@ -12,15 +12,21 @@ import android.preference.PreferenceManager;
 public class SHAB extends Application {
 
     private static Context context;
+    private static SharedPreferences sharedPreferences;
 
     @Override
     public void onCreate() {
         super.onCreate();
         context = getApplicationContext();
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
     }
 
     public static Context getAppContext() {
         return context;
+    }
+
+    public static SharedPreferences getSharedPreferences() {
+        return sharedPreferences;
     }
 
     public static boolean isServiceRunning(Class<?> serviceClass) {

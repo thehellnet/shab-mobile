@@ -3,6 +3,7 @@ package org.thehellnet.shab.mobile.utility;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.telephony.TelephonyManager;
 
@@ -10,6 +11,7 @@ import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.thehellnet.shab.mobile.BuildConfig;
 import org.thehellnet.shab.mobile.SHAB;
+import org.thehellnet.shab.mobile.config.Prefs;
 
 import java.util.UUID;
 
@@ -19,17 +21,25 @@ import java.util.UUID;
 public final class DeviceIdentifier {
 
     public static String getDeviceId() {
-        String id;
+        String deviceId = SHAB.getSharedPreferences()
+                .getString(Prefs.DEVICE_ID, Prefs.DEVICE_ID_DEFAULT);
+        if (deviceId.length() > 0) {
+            return deviceId;
+        }
 
         if (ActivityCompat.checkSelfPermission(SHAB.getAppContext(), Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED) {
             TelephonyManager telephonyManager = (TelephonyManager) SHAB.getAppContext().getSystemService(Context.TELEPHONY_SERVICE);
-            id = telephonyManager.getDeviceId();
+            deviceId = hashDeviceId(telephonyManager.getDeviceId());
         } else {
-            id = UUID.randomUUID().toString();
+            deviceId = hashDeviceId(UUID.randomUUID().toString());
         }
 
+        SHAB.getSharedPreferences()
+                .edit()
+                .putString(Prefs.DEVICE_ID, deviceId)
+                .commit();
 
-        return new String(Hex.encodeHex(DigestUtils.sha256(id)));
+        return deviceId;
     }
 
     public static String getDeviceName() {
@@ -63,5 +73,10 @@ public final class DeviceIdentifier {
 
     public static String getCodeVersion() {
         return String.valueOf(BuildConfig.VERSION_CODE);
+    }
+
+    @NonNull
+    private static String hashDeviceId(@NonNull String input) {
+        return new String(Hex.encodeHex(DigestUtils.sha256(input))).substring(0, 16);
     }
 }
