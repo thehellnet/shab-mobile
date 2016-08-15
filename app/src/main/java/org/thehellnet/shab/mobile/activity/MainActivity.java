@@ -1,9 +1,6 @@
 package org.thehellnet.shab.mobile.activity;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -18,7 +15,6 @@ import org.thehellnet.shab.mobile.R;
 import org.thehellnet.shab.mobile.SHAB;
 import org.thehellnet.shab.mobile.activity.fragment.Fragments;
 import org.thehellnet.shab.mobile.activity.fragment.ShabFragment;
-import org.thehellnet.shab.mobile.config.I;
 import org.thehellnet.shab.mobile.service.ShabService;
 
 public class MainActivity extends ShabActivity {
@@ -44,7 +40,9 @@ public class MainActivity extends ShabActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        replaceFragment(Fragments.MAIN, false);
+        if(fragment == null) {
+            replaceFragment(Fragments.MAIN, false);
+        }
     }
 
     @Override

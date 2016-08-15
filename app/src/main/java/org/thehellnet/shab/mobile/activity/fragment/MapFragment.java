@@ -329,6 +329,7 @@ public class MapFragment extends ShabFragment implements OnMapReadyCallback {
     }
 
     private void initMapFromShabContext() {
+        clearRemoteClients();
         for (Client client : shabContext.getRemoteClients()) {
             addRemoteClient(client);
         }
