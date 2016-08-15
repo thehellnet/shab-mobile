@@ -2,6 +2,7 @@ package org.thehellnet.shab.mobile.service;
 
 import android.Manifest;
 import android.app.Notification;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -14,9 +15,12 @@ import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
+import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 
 import org.joda.time.DateTime;
+import org.thehellnet.shab.mobile.R;
+import org.thehellnet.shab.mobile.activity.MainActivity;
 import org.thehellnet.shab.mobile.config.I;
 import org.thehellnet.shab.mobile.config.Prefs;
 import org.thehellnet.shab.mobile.location.LocationListener;
@@ -83,6 +87,7 @@ public class ShabService extends Service implements ShabSocketCallback {
     private static final int LOCATION_INTERVAL = 1000;
     private static final float LOCATION_DISTANCE = 10f;
     private static final int POSITION_SEND_INTERVAL = 5;
+    private static final int NOTIFICATION_ID = 1;
 
     private final Object SYNC_START = new Object();
     private final Object SYNC_LINEPARSE = new Object();
@@ -118,13 +123,28 @@ public class ShabService extends Service implements ShabSocketCallback {
             }
         }
 
-        Notification notification = new Notification.Builder(getApplicationContext())
+        Intent activityIntent = new Intent(this, MainActivity.class);
+        activityIntent.setAction(Intent.ACTION_MAIN);
+        activityIntent.addCategory(Intent.CATEGORY_LAUNCHER);
+        activityIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+        PendingIntent pendingIntent = PendingIntent.getActivity(
+                getApplicationContext(),
+                0,
+                activityIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT);
+
+        Notification notification = new NotificationCompat.Builder(getApplicationContext())
                 .setContentTitle("SHAB Service")
                 .setContentText("SHAB is running")
                 .setAutoCancel(true)
                 .setOngoing(true)
+                .setContentIntent(pendingIntent)
+                .setWhen(System.currentTimeMillis())
+                .setSmallIcon(R.drawable.icon_notification)
                 .build();
-        startForeground(1, notification);
+
+        startForeground(NOTIFICATION_ID, notification);
 
         return START_STICKY;
     }
