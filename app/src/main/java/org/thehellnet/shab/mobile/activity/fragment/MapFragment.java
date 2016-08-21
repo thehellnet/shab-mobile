@@ -27,9 +27,11 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import org.thehellnet.shab.mobile.R;
 import org.thehellnet.shab.mobile.config.I;
 import org.thehellnet.shab.mobile.config.Prefs;
-import org.thehellnet.shab.protocol.Position;
+import org.thehellnet.shab.mobile.utility.ScreenConverter;
 import org.thehellnet.shab.protocol.ShabContext;
 import org.thehellnet.shab.protocol.entity.Client;
+import org.thehellnet.shab.protocol.entity.Hab;
+import org.thehellnet.shab.protocol.helper.Position;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -57,6 +59,8 @@ public class MapFragment extends ShabFragment implements OnMapReadyCallback {
         public void onReceive(Context context, Intent intent) {
             if (!intent.getBooleanExtra("status", false)) {
                 clearRemoteClients();
+                removeLocalMarker();
+                removeHabMarker();
             }
         }
     }
@@ -101,7 +105,11 @@ public class MapFragment extends ShabFragment implements OnMapReadyCallback {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-
+            Hab hab = shabContext.getHab();
+            if (hab == null) {
+                return;
+            }
+            updateHabMarker(hab.getPosition().getLatitude(), hab.getPosition().getLongitude());
         }
     }
 
@@ -325,7 +333,8 @@ public class MapFragment extends ShabFragment implements OnMapReadyCallback {
         if (useDefault) {
             builder.include(DEFAULT_POSITION);
         }
-        googleMap.moveCamera(CameraUpdateFactory.newLatLngBounds(builder.build(), 30));
+
+        googleMap.moveCamera(CameraUpdateFactory.newLatLngBounds(builder.build(), ScreenConverter.dpToPixel(30)));
     }
 
     private void initMapFromShabContext() {
@@ -342,22 +351,6 @@ public class MapFragment extends ShabFragment implements OnMapReadyCallback {
             remoteClient.marker = null;
         }
         remoteClients.clear();
-    }
-
-    private void updateLocalMarker(double latitude, double longitude) {
-        localPosition = new LatLng(latitude, longitude);
-
-        if (localMarker == null) {
-            MarkerOptions markerOptions = new MarkerOptions();
-            markerOptions.position(localPosition);
-            markerOptions.title("Local");
-            markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.map_marker_green));
-            localMarker = googleMap.addMarker(markerOptions);
-        } else {
-            localMarker.setPosition(localPosition);
-        }
-
-        updateMapBounds();
     }
 
     private void addRemoteClient(Client client) {
@@ -382,7 +375,7 @@ public class MapFragment extends ShabFragment implements OnMapReadyCallback {
         }
         RemoteClient remoteClient = remoteClients.get(client.getId());
         remoteClient.position = new LatLng(client.getPosition().getLatitude(), client.getPosition().getLongitude());
-        if(remoteClient.marker == null) {
+        if (remoteClient.marker == null) {
             remoteClient.marker = googleMap.addMarker(new MarkerOptions()
                     .position(remoteClient.position)
                     .title(client.getName())
@@ -408,6 +401,30 @@ public class MapFragment extends ShabFragment implements OnMapReadyCallback {
         Log.i(TAG, String.format("removeRemoteClient %s", client));
     }
 
+    private void updateLocalMarker(double latitude, double longitude) {
+        localPosition = new LatLng(latitude, longitude);
+
+        if (localMarker == null) {
+            MarkerOptions markerOptions = new MarkerOptions();
+            markerOptions.position(localPosition);
+            markerOptions.title("Local");
+            markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.map_marker_green));
+            localMarker = googleMap.addMarker(markerOptions);
+        } else {
+            localMarker.setPosition(localPosition);
+        }
+
+        updateMapBounds();
+    }
+
+    private void removeLocalMarker() {
+        if (localMarker != null) {
+            localMarker.remove();
+            localMarker = null;
+        }
+        updateMapBounds();
+    }
+
     private void updateHabMarker(double latitude, double longitude) {
         habPosition = new LatLng(latitude, longitude);
 
@@ -421,6 +438,14 @@ public class MapFragment extends ShabFragment implements OnMapReadyCallback {
             habMarker.setPosition(habPosition);
         }
 
+        updateMapBounds();
+    }
+
+    private void removeHabMarker() {
+        if (habMarker != null) {
+            habMarker.remove();
+            habMarker = null;
+        }
         updateMapBounds();
     }
 }

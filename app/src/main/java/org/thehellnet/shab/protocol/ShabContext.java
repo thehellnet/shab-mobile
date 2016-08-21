@@ -9,12 +9,12 @@ import java.util.List;
 /**
  * Created by sardylan on 14/08/16.
  */
-public class ShabContext {
+public final class ShabContext {
 
     private static ShabContext instance;
 
-    private Client localClient = new Client();
     private Hab hab = new Hab();
+    private Client localClient = new Client();
     private List<Client> remoteClients = new ArrayList<>();
 
     private ShabContext() {

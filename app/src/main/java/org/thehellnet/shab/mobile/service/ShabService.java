@@ -26,10 +26,10 @@ import org.thehellnet.shab.mobile.config.Prefs;
 import org.thehellnet.shab.mobile.location.LocationListener;
 import org.thehellnet.shab.mobile.utility.DeviceIdentifier;
 import org.thehellnet.shab.protocol.LineFactory;
-import org.thehellnet.shab.protocol.Position;
 import org.thehellnet.shab.protocol.ShabContext;
 import org.thehellnet.shab.protocol.entity.Client;
 import org.thehellnet.shab.protocol.exception.AbstractProtocolException;
+import org.thehellnet.shab.protocol.helper.Position;
 import org.thehellnet.shab.protocol.line.ClientConnectLine;
 import org.thehellnet.shab.protocol.line.ClientDisconnectLine;
 import org.thehellnet.shab.protocol.line.ClientUpdateLine;
@@ -69,6 +69,9 @@ public class ShabService extends Service implements ShabSocketCallback {
         public void onGpsStatusChanged(int status) {
             switch (status) {
                 case GpsStatus.GPS_EVENT_SATELLITE_STATUS:
+                    if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                        return;
+                    }
                     GpsStatus gpsStatus = locationManager.getGpsStatus(null);
                     int usedSatellites = 0;
                     for (GpsSatellite gpsSatellite : gpsStatus.getSatellites()) {
@@ -334,10 +337,21 @@ public class ShabService extends Service implements ShabSocketCallback {
 
     private void doHabPosition(HabPositionLine line) {
         Intent intent = new Intent(I.COMMAND_HAB_POSITION);
+        Position position = new Position(line.getLatitude(), line.getLongitude(), line.getAltitude());
+        shabContext.getHab().setPosition(position);
+        shabContext.getHab().setFixStatus(line.getFixStatus());
         sendBroadcast(intent);
     }
 
     private void doHabImage(HabImageLine line) {
+        if (line.getSliceNum() == 1) {
+            shabContext.getHab().clearImageData();
+        }
+
+        shabContext.getHab().setSliceTot(line.getSliceTot());
+        shabContext.getHab().setSliceNum(line.getSliceNum());
+        shabContext.getHab().appendImageData(line.getData());
+
         Intent intent = new Intent(I.COMMAND_HAB_IMAGE);
         sendBroadcast(intent);
     }
