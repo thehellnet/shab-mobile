@@ -1,4 +1,4 @@
-package org.thehellnet.shab.protocol;
+package org.thehellnet.shab.mobile.protocol;
 
 import org.thehellnet.shab.protocol.entity.Client;
 import org.thehellnet.shab.protocol.entity.Hab;

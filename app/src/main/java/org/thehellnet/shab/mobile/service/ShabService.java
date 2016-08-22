@@ -25,8 +25,7 @@ import org.thehellnet.shab.mobile.config.I;
 import org.thehellnet.shab.mobile.config.Prefs;
 import org.thehellnet.shab.mobile.location.LocationListener;
 import org.thehellnet.shab.mobile.utility.DeviceIdentifier;
-import org.thehellnet.shab.protocol.LineFactory;
-import org.thehellnet.shab.protocol.ShabContext;
+import org.thehellnet.shab.mobile.protocol.ShabContext;
 import org.thehellnet.shab.protocol.entity.Client;
 import org.thehellnet.shab.protocol.exception.AbstractProtocolException;
 import org.thehellnet.shab.protocol.helper.Position;
@@ -37,8 +36,9 @@ import org.thehellnet.shab.protocol.line.HabImageLine;
 import org.thehellnet.shab.protocol.line.HabPositionLine;
 import org.thehellnet.shab.protocol.line.HabTelemetryLine;
 import org.thehellnet.shab.protocol.line.Line;
-import org.thehellnet.shab.protocol.socket.ShabSocket;
-import org.thehellnet.shab.protocol.socket.ShabSocketCallback;
+import org.thehellnet.shab.mobile.protocol.socket.ShabSocket;
+import org.thehellnet.shab.mobile.protocol.socket.ShabSocketCallback;
+import org.thehellnet.shab.protocol.line.LineFactory;
 
 /**
  * Created by sardylan on 16/07/16.

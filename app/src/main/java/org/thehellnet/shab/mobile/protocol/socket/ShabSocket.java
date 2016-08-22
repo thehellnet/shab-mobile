@@ -1,4 +1,4 @@
-package org.thehellnet.shab.protocol.socket;
+package org.thehellnet.shab.mobile.protocol.socket;
 
 import org.thehellnet.shab.protocol.line.Line;
 
@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 
 /**
@@ -35,8 +36,10 @@ public class ShabSocket {
         thread = new Thread(new Runnable() {
             @Override
             public void run() {
+                socket = new Socket();
                 try {
-                    socket = new Socket(address, port);
+                    socket.setSoTimeout(SOCKET_TIMEOUT);
+                    socket.connect(new InetSocketAddress(address, port));
                     reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                     writer = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()), true);
                 } catch (IOException e) {

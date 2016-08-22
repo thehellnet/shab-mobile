@@ -13,7 +13,7 @@ import org.thehellnet.shab.mobile.R;
 import org.thehellnet.shab.mobile.config.I;
 import org.thehellnet.shab.mobile.utility.Formatter;
 import org.thehellnet.shab.mobile.utility.ImageManipulation;
-import org.thehellnet.shab.protocol.ShabContext;
+import org.thehellnet.shab.mobile.protocol.ShabContext;
 
 /**
  * Created by sardylan on 17/07/16.

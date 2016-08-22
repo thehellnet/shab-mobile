@@ -10,7 +10,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
-import org.thehellnet.shab.mobile.Permissions;
 import org.thehellnet.shab.mobile.R;
 import org.thehellnet.shab.mobile.SHAB;
 import org.thehellnet.shab.mobile.activity.fragment.Fragments;
@@ -119,7 +118,7 @@ public class MainActivity extends ShabActivity {
     }
 
     private void requestPermissions() {
-        ActivityCompat.requestPermissions(this, Permissions.PERMISSIONS, REQUESTCODE_PERMISSIONS);
+        ActivityCompat.requestPermissions(this, SHAB.PERMISSIONS, REQUESTCODE_PERMISSIONS);
     }
 
     private void replaceFragment(Fragments newFragment) {

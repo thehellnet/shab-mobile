@@ -28,7 +28,7 @@ import org.thehellnet.shab.mobile.R;
 import org.thehellnet.shab.mobile.config.I;
 import org.thehellnet.shab.mobile.config.Prefs;
 import org.thehellnet.shab.mobile.utility.ScreenConverter;
-import org.thehellnet.shab.protocol.ShabContext;
+import org.thehellnet.shab.mobile.protocol.ShabContext;
 import org.thehellnet.shab.protocol.entity.Client;
 import org.thehellnet.shab.protocol.entity.Hab;
 import org.thehellnet.shab.protocol.helper.Position;

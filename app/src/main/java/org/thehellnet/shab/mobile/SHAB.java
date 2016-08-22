@@ -11,18 +11,25 @@ import android.preference.PreferenceManager;
  */
 public class SHAB extends Application {
 
-    private static Context context;
+    public static final String[] PERMISSIONS = new String[]{
+            android.Manifest.permission.INTERNET,
+            android.Manifest.permission.ACCESS_FINE_LOCATION,
+            android.Manifest.permission.ACCESS_COARSE_LOCATION,
+            android.Manifest.permission.RECEIVE_BOOT_COMPLETED,
+            android.Manifest.permission.READ_PHONE_STATE
+    };
+
     private static SharedPreferences sharedPreferences;
 
     @Override
     public void onCreate() {
         super.onCreate();
-        context = getApplicationContext();
-        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        ContextKeeper.getInstance().setContext(getApplicationContext());
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
     }
 
     public static Context getAppContext() {
-        return context;
+        return ContextKeeper.getInstance().getContext();
     }
 
     public static SharedPreferences getSharedPreferences() {
@@ -30,8 +37,10 @@ public class SHAB extends Application {
     }
 
     public static boolean isServiceRunning(Class<?> serviceClass) {
-        ActivityManager activityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
-        for (ActivityManager.RunningServiceInfo serviceInfo : activityManager.getRunningServices(Integer.MAX_VALUE)) {
+        ActivityManager activityManager = (ActivityManager) ContextKeeper.getInstance()
+                .getContext().getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo serviceInfo
+                : activityManager.getRunningServices(Integer.MAX_VALUE)) {
             if (serviceClass.getName().equals(serviceInfo.service.getClassName())) {
                 return true;
             }

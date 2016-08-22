@@ -5,7 +5,6 @@ android {
     buildToolsVersion "24.0.1"
 
     dexOptions {
-        incremental true
         javaMaxHeapSize "8g"
     }
 
@@ -53,18 +52,18 @@ android {
 dependencies {
     compile fileTree(dir: "libs", include: ["*.jar"])
 
-    compile "com.google.android.gms:play-services:9.4.0"
-    compile "com.android.support:appcompat-v7:24.1.1"
-    compile "com.android.support:support-v4:24.1.1"
-    compile "com.android.support:design:24.1.1"
-    compile "com.android.support:multidex:1.0.1"
-    compile "com.android.support:multidex-instrumentation:1.0.1"
+    compile group: "com.google.android.gms", name: "play-services", version: "9.4.0"
+    compile group: "com.android.support", name: "appcompat-v7", version: "24.2.0"
+    compile group: "com.android.support", name: "support-v4", version: "24.2.0"
+    compile group: "com.android.support", name: "design", version: "24.2.0"
+    compile group: "com.android.support", name: "multidex", version: "1.0.1"
+    compile group: "com.android.support", name: "multidex-instrumentation", version: "1.0.1"
 
-    compile "org.apache.commons:commons-lang3:3.4"
-    compile "commons-codec:commons-codec:1.10"
-    compile "joda-time:joda-time:2.9.4"
+    compile group: "org.apache.commons", name: "commons-lang3", version: "3.4"
+    compile group: "commons-codec", name: "commons-codec", version: "1.10"
+    compile group: "joda-time", name: "joda-time", version: "2.9.4"
 
-    compile group: "org.thehellnet.shab", name: "protocol", version: "1.3.7"
+    compile group: "org.thehellnet.shab", name: "protocol", version: "1.4.0"
 
-    testCompile "junit:junit:4.12"
+    testCompile group: "junit", name: "junit", version: "4.12"
 }

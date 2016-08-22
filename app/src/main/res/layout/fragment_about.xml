@@ -17,4 +17,8 @@
         style="@style/about_subheader"
         android:layout_below="@id/about_header" />
 
+    <TextView
+        android:id="@+id/about_version"
+        style="@style/about_version"
+        android:layout_alignParentBottom="true" />
 </RelativeLayout>
