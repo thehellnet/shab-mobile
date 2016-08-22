@@ -28,7 +28,6 @@ import org.thehellnet.shab.mobile.R;
 import org.thehellnet.shab.mobile.config.I;
 import org.thehellnet.shab.mobile.config.Prefs;
 import org.thehellnet.shab.mobile.utility.ScreenConverter;
-import org.thehellnet.shab.mobile.protocol.ShabContext;
 import org.thehellnet.shab.protocol.entity.Client;
 import org.thehellnet.shab.protocol.entity.Hab;
 import org.thehellnet.shab.protocol.helper.Position;
@@ -130,7 +129,6 @@ public class MapFragment extends ShabFragment implements OnMapReadyCallback {
     private CommandHabPositionReceiver commandHabPositionReceiver;
 
     private GoogleMap googleMap;
-    private ShabContext shabContext = ShabContext.getInstance();
 
     private LatLng localPosition;
     private Marker localMarker;
@@ -347,8 +345,10 @@ public class MapFragment extends ShabFragment implements OnMapReadyCallback {
 
     private void clearRemoteClients() {
         for (RemoteClient remoteClient : remoteClients.values()) {
-            remoteClient.marker.remove();
-            remoteClient.marker = null;
+            if (remoteClient.marker != null) {
+                remoteClient.marker.remove();
+                remoteClient.marker = null;
+            }
         }
         remoteClients.clear();
     }

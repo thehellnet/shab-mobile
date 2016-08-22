@@ -42,20 +42,20 @@ public final class ShabContext {
         return null;
     }
 
-    public Client getLocalClient() {
-        return localClient;
-    }
-
-    public void setLocalClient(Client localClient) {
-        this.localClient = localClient;
-    }
-
     public Hab getHab() {
         return hab;
     }
 
     public void setHab(Hab hab) {
         this.hab = hab;
+    }
+
+    public Client getLocalClient() {
+        return localClient;
+    }
+
+    public void setLocalClient(Client localClient) {
+        this.localClient = localClient;
     }
 
     public List<Client> getRemoteClients() {

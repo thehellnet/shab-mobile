@@ -33,4 +33,9 @@
     <string name="toast_permissions_granted">Permissions granted</string>
     <string name="toast_permissions_denied">Permissions denied</string>
 
+    <string name="alert_permissions_title">Ask for permissions</string>
+    <string name="alert_permissions_message">App require permission for GPS and device ID. Ask for permissions?</string>
+    <string name="alert_permissions_button_positive">Yes</string>
+    <string name="alert_permissions_button_negative">No</string>
+
 </resources>

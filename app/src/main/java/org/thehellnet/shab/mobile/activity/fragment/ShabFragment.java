@@ -10,6 +10,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import org.thehellnet.shab.mobile.protocol.ShabContext;
+
 /**
  * Created by sardylan on 17/07/16.
  */
@@ -17,6 +19,7 @@ public abstract class ShabFragment extends Fragment {
 
     protected View view;
     protected SharedPreferences prefs;
+    protected ShabContext shabContext = ShabContext.getInstance();
 
     public static ShabFragment getNewFragment(Fragments item) {
         switch (item) {

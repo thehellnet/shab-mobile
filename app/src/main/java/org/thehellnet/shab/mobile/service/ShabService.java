@@ -24,8 +24,10 @@ import org.thehellnet.shab.mobile.activity.MainActivity;
 import org.thehellnet.shab.mobile.config.I;
 import org.thehellnet.shab.mobile.config.Prefs;
 import org.thehellnet.shab.mobile.location.LocationListener;
-import org.thehellnet.shab.mobile.utility.DeviceIdentifier;
 import org.thehellnet.shab.mobile.protocol.ShabContext;
+import org.thehellnet.shab.mobile.protocol.socket.ShabSocket;
+import org.thehellnet.shab.mobile.protocol.socket.ShabSocketCallback;
+import org.thehellnet.shab.mobile.utility.DeviceIdentifier;
 import org.thehellnet.shab.protocol.entity.Client;
 import org.thehellnet.shab.protocol.exception.AbstractProtocolException;
 import org.thehellnet.shab.protocol.helper.Position;
@@ -36,8 +38,6 @@ import org.thehellnet.shab.protocol.line.HabImageLine;
 import org.thehellnet.shab.protocol.line.HabPositionLine;
 import org.thehellnet.shab.protocol.line.HabTelemetryLine;
 import org.thehellnet.shab.protocol.line.Line;
-import org.thehellnet.shab.mobile.protocol.socket.ShabSocket;
-import org.thehellnet.shab.mobile.protocol.socket.ShabSocketCallback;
 import org.thehellnet.shab.protocol.line.LineFactory;
 
 /**
@@ -118,6 +118,9 @@ public class ShabService extends Service implements ShabSocketCallback {
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d(TAG, "onStartCommand");
 
+        locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+        prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+
         if (!alreadyStarted) {
             synchronized (SYNC_START) {
                 if (!alreadyStarted) {
@@ -183,6 +186,8 @@ public class ShabService extends Service implements ShabSocketCallback {
             return;
         }
 
+        broadcastNewLine(line);
+
         synchronized (SYNC_LINEPARSE) {
             if (line instanceof ClientConnectLine) {
                 doClientConnected((ClientConnectLine) line);
@@ -208,9 +213,6 @@ public class ShabService extends Service implements ShabSocketCallback {
 
     private void start() {
         shabContext.clear();
-
-        locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-        prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
@@ -274,6 +276,12 @@ public class ShabService extends Service implements ShabSocketCallback {
         line.setLongitude(shabContext.getLocalClient().getPosition().getLongitude());
         line.setAltitude(shabContext.getLocalClient().getPosition().getAltitude());
         shabSocket.send(line);
+    }
+
+    private void broadcastNewLine(Line line) {
+        Intent intent = new Intent(I.UPDATE_NEWLINE);
+        intent.putExtra("line", line);
+        sendBroadcast(intent);
     }
 
     private void broadcastServiceStatus() {

@@ -10,6 +10,8 @@ public final class Prefs {
     public static final String DEVICE_ID = "device_id";
     public static final String DEVICE_ID_DEFAULT = "";
 
+    public static final String PERMISSIONS_ASK = "permissions_ask";
+    public static final boolean PERMISSIONS_ASK_DEFAULT = false;
     public static final String MAP_AUTOBOUNDS = "map_autobounds";
     public static final boolean MAP_AUTOBOUNDS_DEFAULT = true;
     public static final String MAP_TYPE = "map_type";

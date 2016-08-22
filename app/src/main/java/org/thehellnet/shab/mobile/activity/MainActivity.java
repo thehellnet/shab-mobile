@@ -39,7 +39,7 @@ public class MainActivity extends ShabActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        if(fragment == null) {
+        if (fragment == null) {
             replaceFragment(Fragments.MAIN, false);
         }
     }
@@ -70,7 +70,7 @@ public class MainActivity extends ShabActivity {
                 showSettings();
                 return true;
             case R.id.menu_permissions:
-                requestPermissions();
+                requestPermissions(REQUESTCODE_PERMISSIONS);
                 return true;
             case R.id.menu_about:
                 showAbout();
@@ -104,10 +104,16 @@ public class MainActivity extends ShabActivity {
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if (requestCode != REQUESTCODE_PERMISSIONS) {
-            super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-            return;
+        switch (requestCode) {
+            case REQUESTCODE_PERMISSIONS:
+                displayPermissionResult(grantResults);
+                break;
+            default:
+                super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         }
+    }
+
+    private void displayPermissionResult(@NonNull int[] grantResults) {
         for (int result : grantResults) {
             if (result != PackageManager.PERMISSION_GRANTED) {
                 showToast(R.string.toast_permissions_denied);
@@ -117,8 +123,8 @@ public class MainActivity extends ShabActivity {
         showToast(R.string.toast_permissions_granted);
     }
 
-    private void requestPermissions() {
-        ActivityCompat.requestPermissions(this, SHAB.PERMISSIONS, REQUESTCODE_PERMISSIONS);
+    private void requestPermissions(int requestCode) {
+        ActivityCompat.requestPermissions(this, SHAB.PERMISSIONS, requestCode);
     }
 
     private void replaceFragment(Fragments newFragment) {
