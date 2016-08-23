@@ -11,6 +11,7 @@ import android.location.GpsSatellite;
 import android.location.GpsStatus;
 import android.location.Location;
 import android.location.LocationManager;
+import android.os.Handler;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
@@ -20,6 +21,7 @@ import android.util.Log;
 
 import org.joda.time.DateTime;
 import org.thehellnet.shab.mobile.R;
+import org.thehellnet.shab.mobile.SHAB;
 import org.thehellnet.shab.mobile.activity.MainActivity;
 import org.thehellnet.shab.mobile.config.I;
 import org.thehellnet.shab.mobile.config.Prefs;
@@ -44,6 +46,8 @@ import org.thehellnet.shab.protocol.line.LineFactory;
  * Created by sardylan on 16/07/16.
  */
 public class ShabService extends Service implements ShabSocketCallback {
+
+    public static final int RECONNECTING_TOAST_TIMEOUT = 15;
 
     private class NetworkLocationListener extends LocationListener {
 
@@ -107,6 +111,8 @@ public class ShabService extends Service implements ShabSocketCallback {
 
     private ShabContext shabContext = ShabContext.getInstance();
     private DateTime lastLocalPositionSend;
+
+    private DateTime lastReconnectingToast;
 
     @Nullable
     @Override
@@ -208,7 +214,12 @@ public class ShabService extends Service implements ShabSocketCallback {
     @Override
     public void disconnected() {
         broadcastSocketStatus(false);
-        stop();
+//        stop();
+    }
+
+    @Override
+    public void reconnecting() {
+        Log.i(TAG, "Reconnecting");
     }
 
     private void start() {

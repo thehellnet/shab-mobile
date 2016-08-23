@@ -12,6 +12,7 @@ import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.SeekBar;
 import android.widget.Switch;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -27,7 +28,6 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import org.thehellnet.shab.mobile.R;
 import org.thehellnet.shab.mobile.config.I;
 import org.thehellnet.shab.mobile.config.Prefs;
-import org.thehellnet.shab.mobile.utility.ScreenConverter;
 import org.thehellnet.shab.protocol.entity.Client;
 import org.thehellnet.shab.protocol.entity.Hab;
 import org.thehellnet.shab.protocol.helper.Position;
@@ -140,6 +140,7 @@ public class MapFragment extends ShabFragment implements OnMapReadyCallback {
 
     private Switch autoBoundsSwitch;
     private Button mapTypeButton;
+    private SeekBar zoomSeekBar;
 
     @Override
     protected int getLayout() {
@@ -168,8 +169,23 @@ public class MapFragment extends ShabFragment implements OnMapReadyCallback {
     @Override
     public void onMapReady(GoogleMap googleMapObject) {
         googleMap = googleMapObject;
+
+        googleMap.setOnCameraMoveListener(new GoogleMap.OnCameraMoveListener() {
+            @Override
+            public void onCameraMove() {
+                prefs.edit()
+                        .putFloat(Prefs.MAP_ZOOMLEVEL, googleMap.getCameraPosition().zoom)
+                        .apply();
+                updateZoomSeekBarProgress(googleMap.getCameraPosition().zoom);
+            }
+        });
+
         updateMapType();
         start();
+    }
+
+    private void updateZoomSeekBarProgress(float zoom) {
+        zoomSeekBar.setProgress((int) zoom);
     }
 
     @Override
@@ -179,13 +195,16 @@ public class MapFragment extends ShabFragment implements OnMapReadyCallback {
         autoBoundsSwitch = (Switch) getActivity().findViewById(R.id.option_auto);
         autoBoundsSwitch.setChecked(prefs.getBoolean(Prefs.MAP_AUTOBOUNDS, Prefs.MAP_AUTOBOUNDS_DEFAULT));
 
+        zoomSeekBar = (SeekBar) getActivity().findViewById(R.id.option_auto_zoom);
+        updateZoomSeekBarProgress(prefs.getFloat(Prefs.MAP_ZOOMLEVEL, Prefs.MAP_ZOOMLEVEL_DEFAULT));
+
         mapTypeButton = (Button) getActivity().findViewById(R.id.option_type);
         updateMapTypeButtonCaption();
     }
 
     @Override
-    protected void setOnClickListeners() {
-        super.setOnClickListeners();
+    protected void setEventListeners() {
+        super.setEventListeners();
 
         autoBoundsSwitch.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -193,6 +212,8 @@ public class MapFragment extends ShabFragment implements OnMapReadyCallback {
                 prefs.edit()
                         .putBoolean(Prefs.MAP_AUTOBOUNDS, autoBoundsSwitch.isChecked())
                         .apply();
+                zoomSeekBar.setEnabled(autoBoundsSwitch.isChecked());
+                updateZoomSeekBarProgress(prefs.getFloat(Prefs.MAP_ZOOMLEVEL, Prefs.MAP_ZOOMLEVEL_DEFAULT));
                 updateMapBounds();
             }
         });
@@ -216,6 +237,26 @@ public class MapFragment extends ShabFragment implements OnMapReadyCallback {
 
                 updateMapTypeButtonCaption();
                 updateMapType();
+            }
+        });
+
+        zoomSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                prefs.edit()
+                        .putFloat(Prefs.MAP_ZOOMLEVEL, zoomSeekBar.getProgress())
+                        .apply();
+                updateMapBounds();
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
             }
         });
     }
@@ -332,7 +373,8 @@ public class MapFragment extends ShabFragment implements OnMapReadyCallback {
             builder.include(DEFAULT_POSITION);
         }
 
-        googleMap.moveCamera(CameraUpdateFactory.newLatLngBounds(builder.build(), ScreenConverter.dpToPixel(30)));
+//        googleMap.moveCamera(CameraUpdateFactory.newLatLngBounds(builder.build(), ScreenConverter.dpToPixel(30)));
+        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(builder.build().getCenter(), zoomSeekBar.getProgress()));
     }
 
     private void initMapFromShabContext() {

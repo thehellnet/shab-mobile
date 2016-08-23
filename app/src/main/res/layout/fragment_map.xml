@@ -28,9 +28,18 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
-            android:layout_centerVertical="true"
-            android:text="@string/layout_map_auto"
-            android:singleLine="false" />
+            android:layout_alignParentTop="true"
+            android:text="@string/layout_map_auto" />
+
+        <SeekBar
+            android:id="@+id/option_auto_zoom"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignStart="@+id/option_auto"
+            android:layout_below="@+id/option_auto"
+            android:max="23" />
+
     </RelativeLayout>
 
 </RelativeLayout>

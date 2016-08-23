@@ -10,4 +10,6 @@ public interface ShabSocketCallback {
     void newLine(String rawLine);
 
     void disconnected();
+
+    void reconnecting();
 }

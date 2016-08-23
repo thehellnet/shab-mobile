@@ -52,7 +52,7 @@ public abstract class ShabFragment extends Fragment {
         prefs = PreferenceManager.getDefaultSharedPreferences(getContext());
 
         initElements();
-        setOnClickListeners();
+        setEventListeners();
     }
 
     public Fragments getBackFragment() {
@@ -63,7 +63,7 @@ public abstract class ShabFragment extends Fragment {
 
     }
 
-    protected void setOnClickListeners() {
+    protected void setEventListeners() {
 
     }
 

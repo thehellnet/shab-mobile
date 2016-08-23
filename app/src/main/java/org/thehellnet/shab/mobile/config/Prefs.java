@@ -16,6 +16,8 @@ public final class Prefs {
     public static final boolean MAP_AUTOBOUNDS_DEFAULT = true;
     public static final String MAP_TYPE = "map_type";
     public static final int MAP_TYPE_DEFAULT = GoogleMap.MAP_TYPE_SATELLITE;
+    public static final String MAP_ZOOMLEVEL = "map_zoomlevel";
+    public static final float MAP_ZOOMLEVEL_DEFAULT = 15;
 
     public static final String SERVER_ADDRESS = "socket_address";
     public static final String SERVER_ADDRESS_DEFAULT = "caronte.thehellnet.org";

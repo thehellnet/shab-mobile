@@ -8,7 +8,6 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentManager;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Toast;
 
 import org.thehellnet.shab.mobile.R;
 import org.thehellnet.shab.mobile.SHAB;
@@ -85,7 +84,7 @@ public class MainActivity extends ShabActivity {
         switch (requestCode) {
             case REQUESTCODE_SETTINGS:
                 if (resultCode == RESULT_OK) {
-                    showToast(R.string.toast_settings_saved);
+                    SHAB.showToast(R.string.toast_settings_saved);
                 }
                 break;
             default:
@@ -116,11 +115,11 @@ public class MainActivity extends ShabActivity {
     private void displayPermissionResult(@NonNull int[] grantResults) {
         for (int result : grantResults) {
             if (result != PackageManager.PERMISSION_GRANTED) {
-                showToast(R.string.toast_permissions_denied);
+                SHAB.showToast(R.string.toast_permissions_denied);
                 break;
             }
         }
-        showToast(R.string.toast_permissions_granted);
+        SHAB.showToast(R.string.toast_permissions_granted);
     }
 
     private void requestPermissions(int requestCode) {
@@ -188,13 +187,5 @@ public class MainActivity extends ShabActivity {
 
     private void showAbout() {
         replaceFragment(Fragments.ABOUT);
-    }
-
-    private void showToast(int resId) {
-        showToast(getString(resId));
-    }
-
-    private void showToast(String message) {
-        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
     }
 }

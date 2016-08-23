@@ -5,6 +5,7 @@ import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.widget.Toast;
 
 /**
  * Created by sardylan on 16/07/16.
@@ -46,5 +47,13 @@ public class SHAB extends Application {
             }
         }
         return false;
+    }
+
+    public static void showToast(int resId) {
+        showToast(ContextKeeper.getInstance().getContext().getString(resId));
+    }
+
+    public static void showToast(String message) {
+        Toast.makeText(ContextKeeper.getInstance().getContext(), message, Toast.LENGTH_LONG).show();
     }
 }
