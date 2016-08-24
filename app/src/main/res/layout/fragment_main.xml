@@ -104,6 +104,51 @@
                 style="@style/main_infos_value"
                 android:text="@string/layout_loading" />
         </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/container_infos_int_temp"
+            style="@style/main_infos_container">
+
+            <TextView
+                android:id="@+id/infos_int_temp_label"
+                style="@style/main_infos_label"
+                android:text="@string/layout_main_infos_int_temp_label" />
+
+            <TextView
+                android:id="@+id/infos_int_temp_value"
+                style="@style/main_infos_value"
+                android:text="@string/layout_loading" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/container_infos_ext_temp"
+            style="@style/main_infos_container">
+
+            <TextView
+                android:id="@+id/infos_ext_temp_label"
+                style="@style/main_infos_label"
+                android:text="@string/layout_main_infos_ext_temp_label" />
+
+            <TextView
+                android:id="@+id/infos_ext_temp_value"
+                style="@style/main_infos_value"
+                android:text="@string/layout_loading" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/container_infos_ext_alt"
+            style="@style/main_infos_container">
+
+            <TextView
+                android:id="@+id/infos_ext_alt_label"
+                style="@style/main_infos_label"
+                android:text="@string/layout_main_infos_ext_alt_label" />
+
+            <TextView
+                android:id="@+id/infos_ext_alt_value"
+                style="@style/main_infos_value"
+                android:text="@string/layout_loading" />
+        </RelativeLayout>
     </LinearLayout>
 
     <RelativeLayout

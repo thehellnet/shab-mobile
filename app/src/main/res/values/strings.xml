@@ -16,6 +16,9 @@
     <string name="layout_main_infos_fixstatus_label">FIX Status</string>
     <string name="layout_main_infos_speed_label">Speed</string>
     <string name="layout_main_infos_angle_label">Angle</string>
+    <string name="layout_main_infos_int_temp_label">Internal temp</string>
+    <string name="layout_main_infos_ext_temp_label">External temp</string>
+    <string name="layout_main_infos_ext_alt_label">External altitude</string>
     <string name="layout_main_image_progress_label">Image progress</string>
 
     <string name="title_activity_settings">Settings</string>

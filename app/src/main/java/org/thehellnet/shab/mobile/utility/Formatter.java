@@ -8,7 +8,11 @@ import java.util.Locale;
 
 public final class Formatter {
 
-    public static final String coordinateToString(double coordinate) {
+    public static String coordinateToString(double coordinate) {
         return String.format(Locale.US, "%.06f", coordinate);
+    }
+
+    public static String tempToString(float temp) {
+        return String.format(Locale.US, "%.01f", temp);
     }
 }

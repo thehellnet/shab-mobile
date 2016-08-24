@@ -11,9 +11,9 @@ import android.widget.TextView;
 
 import org.thehellnet.shab.mobile.R;
 import org.thehellnet.shab.mobile.config.I;
+import org.thehellnet.shab.mobile.protocol.ShabContext;
 import org.thehellnet.shab.mobile.utility.Formatter;
 import org.thehellnet.shab.mobile.utility.ImageManipulation;
-import org.thehellnet.shab.mobile.protocol.ShabContext;
 
 /**
  * Created by sardylan on 17/07/16.
@@ -49,6 +49,9 @@ public class MainFragment extends ShabFragment {
     private TextView fixStatusTextView;
     private TextView speedTextView;
     private TextView angleTextView;
+    private TextView intTempTextView;
+    private TextView extTempTextView;
+    private TextView extAltTextView;
 
     private ProgressBar imageProgressBar;
     private ImageView imageView;
@@ -93,6 +96,9 @@ public class MainFragment extends ShabFragment {
         fixStatusTextView = (TextView) getActivity().findViewById(R.id.infos_fixstatus_value);
         speedTextView = (TextView) getActivity().findViewById(R.id.infos_speed_value);
         angleTextView = (TextView) getActivity().findViewById(R.id.infos_angle_value);
+        intTempTextView = (TextView) getActivity().findViewById(R.id.infos_int_temp_value);
+        extTempTextView = (TextView) getActivity().findViewById(R.id.infos_ext_temp_value);
+        extAltTextView = (TextView) getActivity().findViewById(R.id.infos_ext_alt_value);
 
         imageProgressBar = (ProgressBar) getActivity().findViewById(R.id.image_progress_value);
         imageView = (ImageView) getActivity().findViewById(R.id.infos_image);
@@ -108,6 +114,15 @@ public class MainFragment extends ShabFragment {
         if (fixStatusTextView != null)
             fixStatusTextView.setText(shabContext.getHab().getFixStatus().toString());
     }
+
+//    private void updateTelemetry() {
+//        if (intTempTextView != null)
+//            intTempTextView.setText(Formatter.tempToString(shabContext.getHab().g));
+//        if (extTempTextView != null)
+//            extTempTextView.setText(Formatter.tempToString(shabContext.getHab().getPosition().getLongitude()));
+//        if (extAltTextView != null)
+//            extAltTextView.setText(Formatter.tempToString(shabContext.getHab().getPosition().getAltitude()));
+//    }
 
     private void updateImageSlice() {
         if (imageProgressBar != null) {
