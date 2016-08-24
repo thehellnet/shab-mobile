@@ -105,7 +105,7 @@ public class MapFragment extends ShabFragment implements OnMapReadyCallback {
         @Override
         public void onReceive(Context context, Intent intent) {
             Hab hab = shabContext.getHab();
-            if (hab == null) {
+            if (hab == null || hab.getPosition() == null) {
                 return;
             }
             updateHabMarker(hab.getPosition().getLatitude(), hab.getPosition().getLongitude());
@@ -114,8 +114,8 @@ public class MapFragment extends ShabFragment implements OnMapReadyCallback {
 
     private class RemoteClient {
 
-        public LatLng position;
-        public Marker marker;
+        LatLng position;
+        Marker marker;
     }
 
     private static final String TAG = MapFragment.class.getSimpleName();
