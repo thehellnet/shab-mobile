@@ -342,7 +342,7 @@ public class MapFragment extends ShabFragment implements OnMapReadyCallback {
             builder.include(DEFAULT_POSITION);
         }
 
-        googleMap.moveCamera(CameraUpdateFactory.newLatLngBounds(builder.build(), ScreenConverter.dpToPixel(30)));
+        googleMap.moveCamera(CameraUpdateFactory.newLatLngBounds(builder.build(), ScreenConverter.dpToPixel(70)));
     }
 
     private void initMapFromShabContext() {

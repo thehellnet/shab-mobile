@@ -4,14 +4,15 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.util.Log;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import org.thehellnet.shab.mobile.R;
+import org.thehellnet.shab.mobile.SHAB;
 import org.thehellnet.shab.mobile.config.I;
 import org.thehellnet.shab.mobile.protocol.ShabContext;
+import org.thehellnet.shab.mobile.service.ShabService;
 import org.thehellnet.shab.mobile.utility.Formatter;
 import org.thehellnet.shab.mobile.utility.ImageManipulation;
 
@@ -75,6 +76,10 @@ public class MainFragment extends ShabFragment {
         initVars();
         initViews();
 
+        if (SHAB.isServiceRunning(ShabService.class)) {
+            updateViews();
+        }
+
         commandHabPositionReceiver = new CommandHabPositionReceiver();
         getContext().registerReceiver(commandHabPositionReceiver, new IntentFilter(I.COMMAND_HAB_POSITION));
 
@@ -119,7 +124,8 @@ public class MainFragment extends ShabFragment {
     }
 
     private void initViews() {
-        String loadingString = getResources().getString(R.string.layout_loading);
+//        String loadingString = getResources().getString(R.string.layout_loading);
+        String loadingString = "";
 
         if (latitudeTextView != null)
             latitudeTextView.setText(loadingString);
@@ -146,13 +152,23 @@ public class MainFragment extends ShabFragment {
             imageView.setImageResource(R.drawable.shab_image_empty);
     }
 
+    private void updateViews() {
+        updateInfos();
+        updateTelemetry();
+        updateImageSlice();
+    }
+
     private void updateInfos() {
+        if (shabContext.getHab().getPosition() == null) {
+            return;
+        }
+
         if (latitudeTextView != null)
-            latitudeTextView.setText(Formatter.coordinateToString(shabContext.getHab().getPosition().getLatitude()));
+            latitudeTextView.setText(Formatter.latitudeToString(shabContext.getHab().getPosition().getLatitude()));
         if (longitudeTextView != null)
-            longitudeTextView.setText(Formatter.coordinateToString(shabContext.getHab().getPosition().getLongitude()));
+            longitudeTextView.setText(Formatter.longitudeToString(shabContext.getHab().getPosition().getLongitude()));
         if (altitudeTextView != null)
-            altitudeTextView.setText(Formatter.coordinateToString(shabContext.getHab().getPosition().getAltitude()));
+            altitudeTextView.setText(Formatter.altitudeToString(shabContext.getHab().getPosition().getAltitude()));
         if (fixStatusTextView != null)
             fixStatusTextView.setText(shabContext.getHab().getFixStatus().toString());
     }
@@ -163,7 +179,7 @@ public class MainFragment extends ShabFragment {
         if (extTempTextView != null)
             extTempTextView.setText(Formatter.temperatureToString(shabContext.getHab().getExtTemp()));
         if (extAltTextView != null)
-            extAltTextView.setText(Formatter.temperatureToString(shabContext.getHab().getExtAlt()));
+            extAltTextView.setText(Formatter.altitudeToString(shabContext.getHab().getExtAlt()));
     }
 
     private void updateImageSlice() {
@@ -175,9 +191,6 @@ public class MainFragment extends ShabFragment {
         if (shabContext.getHab().getSliceNum() == shabContext.getHab().getSliceTot()
                 && imageView != null) {
             byte[] imageData = shabContext.getHab().getImageData();
-            Log.d(TAG, String.format("Image header and footer: %02X%02X - %02X%02X",
-                    imageData[0], imageData[1],
-                    imageData[imageData.length - 2], imageData[imageData.length - 1]));
             imageView.setImageBitmap(ImageManipulation.createBitmap(imageData));
         }
     }
