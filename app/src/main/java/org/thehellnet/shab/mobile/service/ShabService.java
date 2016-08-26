@@ -172,7 +172,7 @@ public class ShabService extends Service implements ShabSocketCallback {
 
         ClientConnectLine line = new ClientConnectLine();
         line.setId(DeviceIdentifier.getDeviceId());
-        line.setName(prefs.getString(Prefs.NAME, Prefs.NAME_DEFAULT));
+        line.setName(prefs.getString(Prefs.NAME, Prefs.Default.NAME));
         shabSocket.send(line);
 
         sendLocalPosition();
@@ -231,8 +231,8 @@ public class ShabService extends Service implements ShabSocketCallback {
         }
 
         shabSocket = new ShabSocket(this);
-        shabSocket.start(prefs.getString(Prefs.SERVER_ADDRESS, Prefs.SERVER_ADDRESS_DEFAULT),
-                prefs.getInt(Prefs.SOCKET_PORT, Prefs.SOCKET_PORT_DEFAULT));
+        shabSocket.start(prefs.getString(Prefs.SERVER_ADDRESS, Prefs.Default.SERVER_ADDRESS),
+                prefs.getInt(Prefs.SOCKET_PORT, Prefs.Default.SOCKET_PORT));
 
         alreadyStarted = true;
         broadcastServiceStatus();

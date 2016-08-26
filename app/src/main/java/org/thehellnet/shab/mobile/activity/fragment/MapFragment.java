@@ -193,10 +193,10 @@ public class MapFragment extends ShabFragment implements OnMapReadyCallback {
         super.initElements();
 
         autoBoundsSwitch = (Switch) getActivity().findViewById(R.id.option_auto);
-        autoBoundsSwitch.setChecked(prefs.getBoolean(Prefs.MAP_AUTOBOUNDS, Prefs.MAP_AUTOBOUNDS_DEFAULT));
+        autoBoundsSwitch.setChecked(prefs.getBoolean(Prefs.MAP_AUTOBOUNDS, Prefs.Default.MAP_AUTOBOUNDS));
 
         zoomSeekBar = (SeekBar) getActivity().findViewById(R.id.option_auto_zoom);
-        updateZoomSeekBarProgress(prefs.getFloat(Prefs.MAP_ZOOMLEVEL, Prefs.MAP_ZOOMLEVEL_DEFAULT));
+        updateZoomSeekBarProgress(prefs.getFloat(Prefs.MAP_ZOOMLEVEL, Prefs.Default.MAP_ZOOMLEVEL));
 
         mapTypeButton = (Button) getActivity().findViewById(R.id.option_type);
         updateMapTypeButtonCaption();
@@ -213,7 +213,7 @@ public class MapFragment extends ShabFragment implements OnMapReadyCallback {
                         .putBoolean(Prefs.MAP_AUTOBOUNDS, autoBoundsSwitch.isChecked())
                         .apply();
                 zoomSeekBar.setEnabled(autoBoundsSwitch.isChecked());
-                updateZoomSeekBarProgress(prefs.getFloat(Prefs.MAP_ZOOMLEVEL, Prefs.MAP_ZOOMLEVEL_DEFAULT));
+                updateZoomSeekBarProgress(prefs.getFloat(Prefs.MAP_ZOOMLEVEL, Prefs.Default.MAP_ZOOMLEVEL));
                 updateMapBounds();
             }
         });
@@ -221,7 +221,7 @@ public class MapFragment extends ShabFragment implements OnMapReadyCallback {
         mapTypeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                int mapType = prefs.getInt(Prefs.MAP_TYPE, Prefs.MAP_TYPE_DEFAULT);
+                int mapType = prefs.getInt(Prefs.MAP_TYPE, Prefs.Default.MAP_TYPE);
 
                 if (mapTypeButton.getText().equals(getString(R.string.layout_map_type_normal))) {
                     mapType = GoogleMap.MAP_TYPE_NORMAL;
@@ -329,7 +329,7 @@ public class MapFragment extends ShabFragment implements OnMapReadyCallback {
     }
 
     private void updateMapTypeButtonCaption() {
-        switch (prefs.getInt(Prefs.MAP_TYPE, Prefs.MAP_TYPE_DEFAULT)) {
+        switch (prefs.getInt(Prefs.MAP_TYPE, Prefs.Default.MAP_TYPE)) {
             case GoogleMap.MAP_TYPE_NORMAL:
                 mapTypeButton.setText(R.string.layout_map_type_satellite);
                 break;
@@ -340,11 +340,11 @@ public class MapFragment extends ShabFragment implements OnMapReadyCallback {
     }
 
     private void updateMapType() {
-        googleMap.setMapType(prefs.getInt(Prefs.MAP_TYPE, Prefs.MAP_TYPE_DEFAULT));
+        googleMap.setMapType(prefs.getInt(Prefs.MAP_TYPE, Prefs.Default.MAP_TYPE));
     }
 
     private void updateMapBounds() {
-        if (!prefs.getBoolean(Prefs.MAP_AUTOBOUNDS, Prefs.MAP_AUTOBOUNDS_DEFAULT)) {
+        if (!prefs.getBoolean(Prefs.MAP_AUTOBOUNDS, Prefs.Default.MAP_AUTOBOUNDS)) {
             return;
         }
 

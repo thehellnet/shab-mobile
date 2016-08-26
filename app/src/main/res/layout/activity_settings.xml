@@ -42,7 +42,7 @@
                         android:inputType="text"
                         android:text="@string/layout_loading" />
 
-                    <ImageView
+                    <ImageButton
                         android:id="@+id/settings_server_address_reset"
                         style="@style/settings_item_reset"
                         android:contentDescription="@string/layout_settings_reset_description"
@@ -71,7 +71,7 @@
                         android:inputType="text"
                         android:text="@string/layout_loading" />
 
-                    <ImageView
+                    <ImageButton
                         android:id="@+id/settings_server_port_reset"
                         style="@style/settings_item_reset"
                         android:contentDescription="@string/layout_settings_reset_description"
@@ -100,7 +100,7 @@
                         android:inputType="text"
                         android:text="@string/layout_loading" />
 
-                    <ImageView
+                    <ImageButton
                         android:id="@+id/settings_name_reset"
                         style="@style/settings_item_reset"
                         android:contentDescription="@string/layout_settings_reset_description"

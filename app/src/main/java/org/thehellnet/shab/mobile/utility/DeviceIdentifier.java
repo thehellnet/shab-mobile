@@ -22,7 +22,7 @@ public final class DeviceIdentifier {
 
     public static String getDeviceId() {
         String deviceId = SHAB.getSharedPreferences()
-                .getString(Prefs.DEVICE_ID, Prefs.DEVICE_ID_DEFAULT);
+                .getString(Prefs.DEVICE_ID, Prefs.Default.DEVICE_ID);
         if (deviceId.length() > 0) {
             return deviceId;
         }
