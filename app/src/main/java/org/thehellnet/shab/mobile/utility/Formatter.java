@@ -12,7 +12,7 @@ public final class Formatter {
         return String.format(Locale.US, "%.06f", coordinate);
     }
 
-    public static String tempToString(float temp) {
+    public static String temperatureToString(float temp) {
         return String.format(Locale.US, "%.01f", temp);
     }
 }

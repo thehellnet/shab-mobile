@@ -8,6 +8,41 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin">
 
+    <RelativeLayout
+        android:id="@+id/infos_image_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true">
+
+        <ImageView
+            android:id="@+id/infos_image"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/container_image_numbers"
+            android:adjustViewBounds="true"
+            android:src="@drawable/shab_image_empty" />
+
+        <RelativeLayout
+            android:id="@+id/container_image_numbers"
+            style="@style/main_infos_container"
+            android:layout_alignParentBottom="true">
+
+            <TextView
+                android:id="@+id/image_progress_label"
+                style="@style/main_infos_label"
+                android:text="@string/layout_main_image_progress_label" />
+
+            <ProgressBar
+                android:id="@+id/image_progress_value"
+                style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+                android:layout_width="150dp"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true" />
+
+        </RelativeLayout>
+    </RelativeLayout>
+
     <LinearLayout
         android:id="@+id/container_infos"
         android:layout_width="match_parent"
@@ -75,35 +110,9 @@
                 android:text="@string/layout_loading" />
         </RelativeLayout>
 
-        <RelativeLayout
-            android:id="@+id/container_infos_speed"
-            style="@style/main_infos_container">
-
-            <TextView
-                android:id="@+id/infos_speed_label"
-                style="@style/main_infos_label"
-                android:text="@string/layout_main_infos_speed_label" />
-
-            <TextView
-                android:id="@+id/infos_speed_value"
-                style="@style/main_infos_value"
-                android:text="@string/layout_loading" />
-        </RelativeLayout>
-
-        <RelativeLayout
-            android:id="@+id/container_infos_angle"
-            style="@style/main_infos_container">
-
-            <TextView
-                android:id="@+id/infos_angle_label"
-                style="@style/main_infos_label"
-                android:text="@string/layout_main_infos_angle_label" />
-
-            <TextView
-                android:id="@+id/infos_angle_value"
-                style="@style/main_infos_value"
-                android:text="@string/layout_loading" />
-        </RelativeLayout>
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="10dp" />
 
         <RelativeLayout
             android:id="@+id/container_infos_int_temp"
@@ -151,38 +160,4 @@
         </RelativeLayout>
     </LinearLayout>
 
-    <RelativeLayout
-        android:id="@+id/infos_image_container"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true">
-
-        <ImageView
-            android:id="@+id/infos_image"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_above="@+id/container_image_numbers"
-            android:adjustViewBounds="true"
-            android:src="@drawable/shab_image_empty" />
-
-        <RelativeLayout
-            android:id="@+id/container_image_numbers"
-            style="@style/main_infos_container"
-            android:layout_alignParentBottom="true">
-
-            <TextView
-                android:id="@+id/image_progress_label"
-                style="@style/main_infos_label"
-                android:text="@string/layout_main_image_progress_label" />
-
-            <ProgressBar
-                android:id="@+id/image_progress_value"
-                style="@style/Widget.AppCompat.ProgressBar.Horizontal"
-                android:layout_width="150dp"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true" />
-
-        </RelativeLayout>
-    </RelativeLayout>
 </RelativeLayout>

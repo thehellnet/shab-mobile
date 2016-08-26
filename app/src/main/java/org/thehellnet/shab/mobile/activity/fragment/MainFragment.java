@@ -36,19 +36,26 @@ public class MainFragment extends ShabFragment {
         }
     }
 
+    private class CommandHabTelemetryReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            updateTelemetry();
+        }
+    }
+
     private static final String TAG = MainFragment.class.getSimpleName();
 
     private ShabContext shabContext = ShabContext.getInstance();
 
     private CommandHabPositionReceiver commandHabPositionReceiver;
     private CommandHabImageReceiver commandHabImageReceiver;
+    private CommandHabTelemetryReceiver commandHabTelemetryReceiver;
 
     private TextView latitudeTextView;
     private TextView longitudeTextView;
     private TextView altitudeTextView;
     private TextView fixStatusTextView;
-    private TextView speedTextView;
-    private TextView angleTextView;
     private TextView intTempTextView;
     private TextView extTempTextView;
     private TextView extAltTextView;
@@ -66,12 +73,16 @@ public class MainFragment extends ShabFragment {
         super.onResume();
 
         initVars();
+        initViews();
 
         commandHabPositionReceiver = new CommandHabPositionReceiver();
         getContext().registerReceiver(commandHabPositionReceiver, new IntentFilter(I.COMMAND_HAB_POSITION));
 
         commandHabImageReceiver = new CommandHabImageReceiver();
         getContext().registerReceiver(commandHabImageReceiver, new IntentFilter(I.COMMAND_HAB_IMAGE));
+
+        commandHabTelemetryReceiver = new CommandHabTelemetryReceiver();
+        getContext().registerReceiver(commandHabTelemetryReceiver, new IntentFilter(I.COMMAND_HAB_TELEMETRY));
     }
 
     @Override
@@ -86,6 +97,11 @@ public class MainFragment extends ShabFragment {
             commandHabPositionReceiver = null;
         }
 
+        if (commandHabTelemetryReceiver != null) {
+            getContext().unregisterReceiver(commandHabTelemetryReceiver);
+            commandHabTelemetryReceiver = null;
+        }
+
         super.onPause();
     }
 
@@ -94,14 +110,40 @@ public class MainFragment extends ShabFragment {
         longitudeTextView = (TextView) getActivity().findViewById(R.id.infos_longitude_value);
         altitudeTextView = (TextView) getActivity().findViewById(R.id.infos_altitude_value);
         fixStatusTextView = (TextView) getActivity().findViewById(R.id.infos_fixstatus_value);
-        speedTextView = (TextView) getActivity().findViewById(R.id.infos_speed_value);
-        angleTextView = (TextView) getActivity().findViewById(R.id.infos_angle_value);
         intTempTextView = (TextView) getActivity().findViewById(R.id.infos_int_temp_value);
         extTempTextView = (TextView) getActivity().findViewById(R.id.infos_ext_temp_value);
         extAltTextView = (TextView) getActivity().findViewById(R.id.infos_ext_alt_value);
 
         imageProgressBar = (ProgressBar) getActivity().findViewById(R.id.image_progress_value);
         imageView = (ImageView) getActivity().findViewById(R.id.infos_image);
+    }
+
+    private void initViews() {
+        String loadingString = getResources().getString(R.string.layout_loading);
+
+        if (latitudeTextView != null)
+            latitudeTextView.setText(loadingString);
+        if (longitudeTextView != null)
+            longitudeTextView.setText(loadingString);
+        if (altitudeTextView != null)
+            altitudeTextView.setText(loadingString);
+        if (fixStatusTextView != null)
+            fixStatusTextView.setText(loadingString);
+
+        if (intTempTextView != null)
+            intTempTextView.setText(loadingString);
+        if (extTempTextView != null)
+            extTempTextView.setText(loadingString);
+        if (extAltTextView != null)
+            extAltTextView.setText(loadingString);
+
+        if (imageProgressBar != null) {
+            imageProgressBar.setMax(1);
+            imageProgressBar.setProgress(0);
+        }
+
+        if (imageView != null)
+            imageView.setImageResource(R.drawable.shab_image_empty);
     }
 
     private void updateInfos() {
@@ -115,14 +157,14 @@ public class MainFragment extends ShabFragment {
             fixStatusTextView.setText(shabContext.getHab().getFixStatus().toString());
     }
 
-//    private void updateTelemetry() {
-//        if (intTempTextView != null)
-//            intTempTextView.setText(Formatter.tempToString(shabContext.getHab().g));
-//        if (extTempTextView != null)
-//            extTempTextView.setText(Formatter.tempToString(shabContext.getHab().getPosition().getLongitude()));
-//        if (extAltTextView != null)
-//            extAltTextView.setText(Formatter.tempToString(shabContext.getHab().getPosition().getAltitude()));
-//    }
+    private void updateTelemetry() {
+        if (intTempTextView != null)
+            intTempTextView.setText(Formatter.temperatureToString(shabContext.getHab().getIntTemp()));
+        if (extTempTextView != null)
+            extTempTextView.setText(Formatter.temperatureToString(shabContext.getHab().getExtTemp()));
+        if (extAltTextView != null)
+            extAltTextView.setText(Formatter.temperatureToString(shabContext.getHab().getExtAlt()));
+    }
 
     private void updateImageSlice() {
         if (imageProgressBar != null) {

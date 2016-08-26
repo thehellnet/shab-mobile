@@ -13,11 +13,12 @@ public final class ShabContext {
 
     private static ShabContext instance;
 
-    private Hab hab = new Hab();
-    private Client localClient = new Client();
-    private List<Client> remoteClients = new ArrayList<>();
+    private Hab hab;
+    private Client localClient;
+    private List<Client> remoteClients;
 
     private ShabContext() {
+        clear();
     }
 
     public static ShabContext getInstance() {
@@ -28,9 +29,9 @@ public final class ShabContext {
     }
 
     public void clear() {
-        localClient.setPosition(null);
-        hab.setPosition(null);
-        remoteClients.clear();
+        hab = new Hab();
+        localClient = new Client();
+        remoteClients = new ArrayList<>();
     }
 
     public Client findRemoteClientById(String id) {

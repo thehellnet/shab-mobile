@@ -11,7 +11,6 @@ import android.location.GpsSatellite;
 import android.location.GpsStatus;
 import android.location.Location;
 import android.location.LocationManager;
-import android.os.Handler;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
@@ -21,7 +20,6 @@ import android.util.Log;
 
 import org.joda.time.DateTime;
 import org.thehellnet.shab.mobile.R;
-import org.thehellnet.shab.mobile.SHAB;
 import org.thehellnet.shab.mobile.activity.MainActivity;
 import org.thehellnet.shab.mobile.config.I;
 import org.thehellnet.shab.mobile.config.Prefs;
@@ -355,10 +353,11 @@ public class ShabService extends Service implements ShabSocketCallback {
     }
 
     private void doHabPosition(HabPositionLine line) {
-        Intent intent = new Intent(I.COMMAND_HAB_POSITION);
         Position position = new Position(line.getLatitude(), line.getLongitude(), line.getAltitude());
         shabContext.getHab().setPosition(position);
         shabContext.getHab().setFixStatus(line.getFixStatus());
+
+        Intent intent = new Intent(I.COMMAND_HAB_POSITION);
         sendBroadcast(intent);
     }
 
@@ -376,6 +375,10 @@ public class ShabService extends Service implements ShabSocketCallback {
     }
 
     private void doHabTelemetry(HabTelemetryLine line) {
+        shabContext.getHab().setIntTemp(line.getIntTemp());
+        shabContext.getHab().setExtTemp(line.getExtTemp());
+        shabContext.getHab().setExtAlt(line.getExtAlt());
+
         Intent intent = new Intent(I.COMMAND_HAB_TELEMETRY);
         sendBroadcast(intent);
     }
