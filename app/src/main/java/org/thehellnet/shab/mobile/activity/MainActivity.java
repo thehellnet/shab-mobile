@@ -31,16 +31,28 @@ public class MainActivity extends ShabActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        if (savedInstanceState != null) {
+            fragment = (Fragments) savedInstanceState.getSerializable("fragment");
+        }
+
         setContentView(R.layout.activity_main);
         fragmentManager = getSupportFragmentManager();
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putSerializable("fragment", fragment);
+        super.onSaveInstanceState(outState);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         if (fragment == null) {
-            replaceFragment(Fragments.MAIN, false);
+            fragment = Fragments.MAIN;
         }
+        replaceFragment(fragment, false);
     }
 
     @Override
