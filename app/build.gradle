@@ -25,8 +25,8 @@ android {
         applicationId "org.thehellnet.shab.mobile"
         minSdkVersion 17
         targetSdkVersion 24
-        versionCode 13
-        versionName "0.8.9"
+        versionCode 14
+        versionName "0.8.10"
 
         multiDexEnabled true
     }
@@ -62,6 +62,8 @@ dependencies {
     compile group: "com.android.support", name: "design", version: "24.2.0"
     compile group: "com.android.support", name: "multidex", version: "1.0.1"
     compile group: "com.android.support", name: "multidex-instrumentation", version: "1.0.1"
+
+    compile group: "org.slf4j", name: "slf4j-android", version: "1.7.21"
 
     compile group: "org.apache.commons", name: "commons-lang3", version: "3.4"
 
