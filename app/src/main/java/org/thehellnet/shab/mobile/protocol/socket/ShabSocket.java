@@ -75,13 +75,8 @@ public class ShabSocket {
                     callback.disconnected();
                     socket = null;
 
-                    if (!keepRunning) {
-                        break;
-                    }
-
-                    if (!sleep()) {
-                        break;
-                    }
+                    if (!keepRunning) break;
+                    if (!sleep()) break;
 
                     Log.d(TAG, "Reconnecting");
                     callback.reconnecting();
@@ -121,12 +116,10 @@ public class ShabSocket {
     }
 
     public void send(String line) {
-        if (socket == null || !socket.isConnected() || writer == null) {
-            return;
-        }
-        if (lastLine.equals(line) || line.length() == 0) {
-            return;
-        }
+        if (line == null || line.length() == 0) return;
+        if (socket == null || !socket.isConnected() || writer == null) return;
+        if (lastLine != null && lastLine.equals(line)) return;
+
         lastLine = line;
         writer.println(lastLine);
         writer.flush();

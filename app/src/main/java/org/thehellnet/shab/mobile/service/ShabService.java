@@ -39,13 +39,12 @@ import org.thehellnet.shab.protocol.line.HabPositionLine;
 import org.thehellnet.shab.protocol.line.HabTelemetryLine;
 import org.thehellnet.shab.protocol.line.Line;
 import org.thehellnet.shab.protocol.line.LineFactory;
+import org.thehellnet.shab.protocol.line.ServerPingLine;
 
 /**
  * Created by sardylan on 16/07/16.
  */
 public class ShabService extends Service implements ShabSocketCallback {
-
-    public static final int RECONNECTING_TOAST_TIMEOUT = 15;
 
     private class NetworkLocationListener extends LocationListener {
 
@@ -94,6 +93,9 @@ public class ShabService extends Service implements ShabSocketCallback {
     private static final int POSITION_SEND_INTERVAL = 5;
     private static final int NOTIFICATION_ID = 1;
 
+    private static final int SERVER_PING_DELAY = 2500;
+    private static final int SERVER_PING_DELAY_MAX = 5000;
+
     private final Object SYNC_START = new Object();
     private final Object SYNC_LINEPARSE = new Object();
 
@@ -110,7 +112,8 @@ public class ShabService extends Service implements ShabSocketCallback {
     private ShabContext shabContext = ShabContext.getInstance();
     private DateTime lastLocalPositionSend;
 
-    private DateTime lastReconnectingToast;
+    private Thread serverPingThread;
+    private DateTime lastServerPingDateTime;
 
     @Nullable
     @Override
@@ -175,6 +178,7 @@ public class ShabService extends Service implements ShabSocketCallback {
         line.setName(prefs.getString(Prefs.NAME, Prefs.Default.NAME));
         shabSocket.send(line);
 
+        pingerStart();
         sendLocalPosition();
     }
 
@@ -205,6 +209,8 @@ public class ShabService extends Service implements ShabSocketCallback {
                 doHabImage((HabImageLine) line);
             } else if (line instanceof HabTelemetryLine) {
                 doHabTelemetry((HabTelemetryLine) line);
+            } else if (line instanceof ServerPingLine) {
+                doServerPing((ServerPingLine) line);
             }
         }
     }
@@ -212,7 +218,8 @@ public class ShabService extends Service implements ShabSocketCallback {
     @Override
     public void disconnected() {
         broadcastSocketStatus(false);
-//        stop();
+
+        pingerStop();
     }
 
     @Override
@@ -220,7 +227,7 @@ public class ShabService extends Service implements ShabSocketCallback {
         Log.i(TAG, "Reconnecting");
     }
 
-    private void start() {
+    private synchronized void start() {
         shabContext.clear();
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
@@ -238,7 +245,7 @@ public class ShabService extends Service implements ShabSocketCallback {
         broadcastServiceStatus();
     }
 
-    private void stop() {
+    private synchronized void stop() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             locationManager.removeUpdates(networkLocationListener);
@@ -256,6 +263,53 @@ public class ShabService extends Service implements ShabSocketCallback {
 
         alreadyStarted = false;
         broadcastServiceStatus();
+    }
+
+    private void pingerStart() {
+        serverPingThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                lastServerPingDateTime = new DateTime();
+
+                while (!serverPingThread.isInterrupted()) {
+                    try {
+                        Thread.sleep(SERVER_PING_DELAY);
+                    } catch (InterruptedException ignored) {
+                        break;
+                    }
+
+                    if (lastServerPingDateTime.plusSeconds(SERVER_PING_DELAY_MAX).isBeforeNow()) {
+                        Log.w(TAG, "No answer to Ping, reconnecting...");
+                        reconnect();
+                        break;
+                    }
+
+                    ServerPingLine serverPingLine = new ServerPingLine();
+                    serverPingLine.setTimestamp(DateTime.now().getMillis());
+                    shabSocket.send(serverPingLine);
+                    Log.d(TAG, "Sending ServerPing line");
+                }
+            }
+        });
+        serverPingThread.setDaemon(true);
+        serverPingThread.start();
+    }
+
+    private void pingerStop() {
+        if (serverPingThread != null) {
+            serverPingThread.interrupt();
+            try {
+                serverPingThread.join();
+            } catch (InterruptedException ignored) {
+            }
+            serverPingThread = null;
+        }
+    }
+
+    private synchronized void reconnect() {
+        stop();
+        sleep(1500);
+        start();
     }
 
     private void handleNewLocationFromProviders(Location location) {
@@ -381,5 +435,17 @@ public class ShabService extends Service implements ShabSocketCallback {
 
         Intent intent = new Intent(I.COMMAND_HAB_TELEMETRY);
         sendBroadcast(intent);
+    }
+
+    private void doServerPing(ServerPingLine line) {
+        Log.d(TAG, "Receiving ServerPing line");
+        lastServerPingDateTime = new DateTime();
+    }
+
+    private static void sleep(int delay) {
+        try {
+            Thread.sleep(delay);
+        } catch (InterruptedException ignored) {
+        }
     }
 }
