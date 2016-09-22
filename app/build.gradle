@@ -56,10 +56,10 @@ android {
 dependencies {
     compile fileTree(dir: "libs", include: ["*.jar"])
 
-    compile group: "com.google.android.gms", name: "play-services", version: "9.4.0"
-    compile group: "com.android.support", name: "appcompat-v7", version: "24.2.0"
-    compile group: "com.android.support", name: "support-v4", version: "24.2.0"
-    compile group: "com.android.support", name: "design", version: "24.2.0"
+    compile group: "com.google.android.gms", name: "play-services", version: "9.6.0"
+    compile group: "com.android.support", name: "appcompat-v7", version: "24.2.1"
+    compile group: "com.android.support", name: "support-v4", version: "24.2.1"
+    compile group: "com.android.support", name: "design", version: "24.2.1"
     compile group: "com.android.support", name: "multidex", version: "1.0.1"
     compile group: "com.android.support", name: "multidex-instrumentation", version: "1.0.1"
 
