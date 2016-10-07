@@ -16,17 +16,13 @@ public class SHAB extends Application {
             android.Manifest.permission.INTERNET,
             android.Manifest.permission.ACCESS_FINE_LOCATION,
             android.Manifest.permission.ACCESS_COARSE_LOCATION,
-            android.Manifest.permission.RECEIVE_BOOT_COMPLETED,
-            android.Manifest.permission.READ_PHONE_STATE
+            android.Manifest.permission.RECEIVE_BOOT_COMPLETED
     };
-
-    private static SharedPreferences sharedPreferences;
 
     @Override
     public void onCreate() {
         super.onCreate();
         ContextKeeper.getInstance().setContext(getApplicationContext());
-        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
     }
 
     public static Context getAppContext() {
@@ -34,12 +30,12 @@ public class SHAB extends Application {
     }
 
     public static SharedPreferences getSharedPreferences() {
-        return sharedPreferences;
+        return PreferenceManager.getDefaultSharedPreferences(getAppContext());
     }
 
     public static boolean isServiceRunning(Class<?> serviceClass) {
-        ActivityManager activityManager = (ActivityManager) ContextKeeper.getInstance()
-                .getContext().getSystemService(Context.ACTIVITY_SERVICE);
+        ActivityManager activityManager = (ActivityManager) getAppContext()
+                .getSystemService(Context.ACTIVITY_SERVICE);
         for (ActivityManager.RunningServiceInfo serviceInfo
                 : activityManager.getRunningServices(Integer.MAX_VALUE)) {
             if (serviceClass.getName().equals(serviceInfo.service.getClassName())) {
@@ -50,10 +46,10 @@ public class SHAB extends Application {
     }
 
     public static void showToast(int resId) {
-        showToast(ContextKeeper.getInstance().getContext().getString(resId));
+        showToast(getAppContext().getString(resId));
     }
 
     public static void showToast(String message) {
-        Toast.makeText(ContextKeeper.getInstance().getContext(), message, Toast.LENGTH_LONG).show();
+        Toast.makeText(getAppContext(), message, Toast.LENGTH_LONG).show();
     }
 }

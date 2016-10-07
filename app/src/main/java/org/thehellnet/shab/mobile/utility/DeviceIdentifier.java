@@ -1,11 +1,6 @@
 package org.thehellnet.shab.mobile.utility;
 
-import android.Manifest;
-import android.content.Context;
-import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
-import android.telephony.TelephonyManager;
 
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -23,21 +18,17 @@ public final class DeviceIdentifier {
     public static String getDeviceId() {
         String deviceId = SHAB.getSharedPreferences()
                 .getString(Prefs.DEVICE_ID, Prefs.Default.DEVICE_ID);
+
         if (deviceId.length() > 0) {
             return deviceId;
         }
 
-        if (ActivityCompat.checkSelfPermission(SHAB.getAppContext(), Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED) {
-            TelephonyManager telephonyManager = (TelephonyManager) SHAB.getAppContext().getSystemService(Context.TELEPHONY_SERVICE);
-            deviceId = hashDeviceId(telephonyManager.getDeviceId());
-        } else {
-            deviceId = hashDeviceId(UUID.randomUUID().toString());
-        }
+        deviceId = hashDeviceId(UUID.randomUUID().toString());
 
         SHAB.getSharedPreferences()
                 .edit()
                 .putString(Prefs.DEVICE_ID, deviceId)
-                .commit();
+                .apply();
 
         return deviceId;
     }

@@ -45,14 +45,22 @@ public class MainFragment extends ShabFragment {
         }
     }
 
-    private static final String TAG = MainFragment.class.getSimpleName();
+    private class UpdateGpsStatusReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            updateInfos();
+        }
+    }
 
     private ShabContext shabContext = ShabContext.getInstance();
 
     private CommandHabPositionReceiver commandHabPositionReceiver;
     private CommandHabImageReceiver commandHabImageReceiver;
     private CommandHabTelemetryReceiver commandHabTelemetryReceiver;
+    private UpdateGpsStatusReceiver updateGpsStatusReceiver;
 
+    private TextView gpsStatusTextView;
     private TextView latitudeTextView;
     private TextView longitudeTextView;
     private TextView altitudeTextView;
@@ -88,6 +96,9 @@ public class MainFragment extends ShabFragment {
 
         commandHabTelemetryReceiver = new CommandHabTelemetryReceiver();
         getContext().registerReceiver(commandHabTelemetryReceiver, new IntentFilter(I.COMMAND_HAB_TELEMETRY));
+
+        updateGpsStatusReceiver = new UpdateGpsStatusReceiver();
+        getContext().registerReceiver(updateGpsStatusReceiver, new IntentFilter(I.UPDATE_GPS_STATUS));
     }
 
     @Override
@@ -107,10 +118,17 @@ public class MainFragment extends ShabFragment {
             commandHabTelemetryReceiver = null;
         }
 
+        if (updateGpsStatusReceiver != null) {
+            getContext().unregisterReceiver(updateGpsStatusReceiver);
+            updateGpsStatusReceiver = null;
+        }
+
         super.onPause();
     }
 
     private void initVars() {
+        gpsStatusTextView = (TextView) getActivity().findViewById(R.id.infos_gps_status_value);
+
         latitudeTextView = (TextView) getActivity().findViewById(R.id.infos_latitude_value);
         longitudeTextView = (TextView) getActivity().findViewById(R.id.infos_longitude_value);
         altitudeTextView = (TextView) getActivity().findViewById(R.id.infos_altitude_value);
@@ -126,6 +144,9 @@ public class MainFragment extends ShabFragment {
     private void initViews() {
 //        String loadingString = getResources().getString(R.string.layout_loading);
         String loadingString = "";
+
+        if (gpsStatusTextView != null)
+            gpsStatusTextView.setText(loadingString);
 
         if (latitudeTextView != null)
             latitudeTextView.setText(loadingString);
@@ -159,18 +180,19 @@ public class MainFragment extends ShabFragment {
     }
 
     private void updateInfos() {
-        if (shabContext.getHab().getPosition() == null) {
-            return;
-        }
+        if (gpsStatusTextView != null)
+            gpsStatusTextView.setText(shabContext.getGpsStatus());
 
-        if (latitudeTextView != null)
-            latitudeTextView.setText(Formatter.latitudeToString(shabContext.getHab().getPosition().getLatitude()));
-        if (longitudeTextView != null)
-            longitudeTextView.setText(Formatter.longitudeToString(shabContext.getHab().getPosition().getLongitude()));
-        if (altitudeTextView != null)
-            altitudeTextView.setText(Formatter.altitudeToString(shabContext.getHab().getPosition().getAltitude()));
-        if (fixStatusTextView != null)
-            fixStatusTextView.setText(shabContext.getHab().getFixStatus().toString());
+        if (shabContext.getHab().getPosition() != null) {
+            if (latitudeTextView != null)
+                latitudeTextView.setText(Formatter.latitudeToString(shabContext.getHab().getPosition().getLatitude()));
+            if (longitudeTextView != null)
+                longitudeTextView.setText(Formatter.longitudeToString(shabContext.getHab().getPosition().getLongitude()));
+            if (altitudeTextView != null)
+                altitudeTextView.setText(Formatter.altitudeToString(shabContext.getHab().getPosition().getAltitude()));
+            if (fixStatusTextView != null)
+                fixStatusTextView.setText(shabContext.getHab().getFixStatus().toString());
+        }
     }
 
     private void updateTelemetry() {

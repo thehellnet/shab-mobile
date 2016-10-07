@@ -16,6 +16,7 @@ public final class ShabContext {
     private Hab hab;
     private Client localClient;
     private List<Client> remoteClients;
+    private String gpsStatus;
 
     private ShabContext() {
         clear();
@@ -65,5 +66,13 @@ public final class ShabContext {
 
     public void setRemoteClients(List<Client> remoteClients) {
         this.remoteClients = remoteClients;
+    }
+
+    public String getGpsStatus() {
+        return gpsStatus;
+    }
+
+    public void setGpsStatus(String gpsStatus) {
+        this.gpsStatus = gpsStatus;
     }
 }

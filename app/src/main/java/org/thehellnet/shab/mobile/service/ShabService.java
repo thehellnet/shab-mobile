@@ -1,20 +1,17 @@
 package org.thehellnet.shab.mobile.service;
 
-import android.Manifest;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
-import android.location.GpsSatellite;
-import android.location.GpsStatus;
 import android.location.Location;
-import android.location.LocationManager;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 
@@ -23,11 +20,14 @@ import org.thehellnet.shab.mobile.R;
 import org.thehellnet.shab.mobile.activity.MainActivity;
 import org.thehellnet.shab.mobile.config.I;
 import org.thehellnet.shab.mobile.config.Prefs;
-import org.thehellnet.shab.mobile.location.LocationListener;
 import org.thehellnet.shab.mobile.protocol.ShabContext;
 import org.thehellnet.shab.mobile.protocol.socket.ShabSocket;
 import org.thehellnet.shab.mobile.protocol.socket.ShabSocketCallback;
+import org.thehellnet.shab.mobile.service.location.LocationCallback;
+import org.thehellnet.shab.mobile.service.location.LocationProvider;
+import org.thehellnet.shab.mobile.service.location.LocationService;
 import org.thehellnet.shab.mobile.utility.DeviceIdentifier;
+import org.thehellnet.shab.mobile.utility.General;
 import org.thehellnet.shab.protocol.entity.Client;
 import org.thehellnet.shab.protocol.exception.AbstractProtocolException;
 import org.thehellnet.shab.protocol.helper.Position;
@@ -46,71 +46,59 @@ import org.thehellnet.shab.protocol.line.ServerPingLine;
  */
 public class ShabService extends Service implements ShabSocketCallback {
 
-    private class NetworkLocationListener extends LocationListener {
+    private class LocationServiceConnection implements ServiceConnection {
 
         @Override
-        public void onLocationChanged(Location location) {
-            if (!useGpsInsteadNetwork) {
-                handleNewLocationFromProviders(location);
-            }
+        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+            LocationService.ServiceBinder binder = (LocationService.ServiceBinder) iBinder;
+            LocationProvider locationProvider = binder.getService();
+            locationProvider.setCallback(locationServiceCallback);
+            locationServiceBound = true;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+            locationServiceBound = false;
         }
     }
 
-    private class GpsLocationListener extends LocationListener {
+    private class LocationServiceCallback implements LocationCallback {
 
         @Override
-        public void onLocationChanged(Location location) {
-            handleNewLocationFromProviders(location);
+        public void newLocation(Location location) {
+            Position position = new Position();
+            position.setLatitude(location.getLatitude());
+            position.setLongitude(location.getLongitude());
+            position.setAltitude(location.getAltitude());
+            shabContext.getLocalClient().setPosition(position);
+            sendLocalPosition();
         }
-    }
-
-    private class GpsStatusListener implements GpsStatus.Listener {
 
         @Override
-        public void onGpsStatusChanged(int status) {
-            switch (status) {
-                case GpsStatus.GPS_EVENT_SATELLITE_STATUS:
-                    if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                        return;
-                    }
-                    GpsStatus gpsStatus = locationManager.getGpsStatus(null);
-                    int usedSatellites = 0;
-                    for (GpsSatellite gpsSatellite : gpsStatus.getSatellites()) {
-                        if (gpsSatellite.usedInFix()) {
-                            usedSatellites++;
-                        }
-                    }
-                    useGpsInsteadNetwork = usedSatellites >= 3;
-//                    Log.d(TAG, String.format("Used satellited: %d - useGpsInsteadNetwork: %s", usedSatellites, useGpsInsteadNetwork));
-                    break;
-            }
+        public void newGpsStatus(String gpsStatus) {
+            shabContext.setGpsStatus(gpsStatus);
+            Intent intent = new Intent(I.UPDATE_GPS_STATUS);
+            sendBroadcast(intent);
         }
     }
 
     private static final String TAG = ShabService.class.getSimpleName();
-    private static final int LOCATION_INTERVAL = 1000;
-    private static final float LOCATION_DISTANCE = 10f;
-    private static final int POSITION_SEND_INTERVAL = 5;
     private static final int NOTIFICATION_ID = 1;
-
     private static final int SERVER_PING_DELAY = 2500;
     private static final int SERVER_PING_DELAY_MAX = 5000;
 
     private final Object SYNC_START = new Object();
     private final Object SYNC_LINEPARSE = new Object();
 
-    private LocationManager locationManager;
-    private LocationListener gpsLocationListener = new GpsLocationListener();
-    private LocationListener networkLocationListener = new NetworkLocationListener();
-    private GpsStatusListener gpsStatusListener = new GpsStatusListener();
-    private boolean useGpsInsteadNetwork = false;
-
     private SharedPreferences prefs;
     private ShabSocket shabSocket;
     private boolean alreadyStarted = false;
 
+    private LocationServiceConnection locationServiceConnection = new LocationServiceConnection();
+    private LocationServiceCallback locationServiceCallback = new LocationServiceCallback();
+    private boolean locationServiceBound = false;
+
     private ShabContext shabContext = ShabContext.getInstance();
-    private DateTime lastLocalPositionSend;
 
     private Thread serverPingThread;
     private DateTime lastServerPingDateTime;
@@ -123,9 +111,6 @@ public class ShabService extends Service implements ShabSocketCallback {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.d(TAG, "onStartCommand");
-
-        locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 
         if (!alreadyStarted) {
@@ -136,35 +121,13 @@ public class ShabService extends Service implements ShabSocketCallback {
             }
         }
 
-        Intent activityIntent = new Intent(this, MainActivity.class);
-        activityIntent.setAction(Intent.ACTION_MAIN);
-        activityIntent.addCategory(Intent.CATEGORY_LAUNCHER);
-        activityIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-
-        PendingIntent pendingIntent = PendingIntent.getActivity(
-                getApplicationContext(),
-                0,
-                activityIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT);
-
-        Notification notification = new NotificationCompat.Builder(getApplicationContext())
-                .setContentTitle("SHAB Service")
-                .setContentText("SHAB is running")
-                .setAutoCancel(true)
-                .setOngoing(true)
-                .setContentIntent(pendingIntent)
-                .setWhen(System.currentTimeMillis())
-                .setSmallIcon(R.drawable.icon_notification)
-                .build();
-
-        startForeground(NOTIFICATION_ID, notification);
+        showNotificationIcon();
 
         return START_STICKY;
     }
 
     @Override
     public void onDestroy() {
-        Log.d(TAG, "onDestroy");
         stop();
         super.onDestroy();
     }
@@ -230,36 +193,30 @@ public class ShabService extends Service implements ShabSocketCallback {
     private synchronized void start() {
         shabContext.clear();
 
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
-                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, LOCATION_INTERVAL, LOCATION_DISTANCE, gpsLocationListener);
-            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, LOCATION_INTERVAL, LOCATION_DISTANCE, networkLocationListener);
-            locationManager.addGpsStatusListener(gpsStatusListener);
-        }
-
         shabSocket = new ShabSocket(this);
         shabSocket.start(prefs.getString(Prefs.SERVER_ADDRESS, Prefs.Default.SERVER_ADDRESS),
                 prefs.getInt(Prefs.SOCKET_PORT, Prefs.Default.SOCKET_PORT));
+
+        if (!locationServiceBound) {
+            bindService(new Intent(this, LocationService.class), locationServiceConnection, Context.BIND_AUTO_CREATE);
+        }
 
         alreadyStarted = true;
         broadcastServiceStatus();
     }
 
     private synchronized void stop() {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
-                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            locationManager.removeUpdates(networkLocationListener);
-            locationManager.removeUpdates(gpsLocationListener);
-            locationManager.removeGpsStatusListener(gpsStatusListener);
-        }
-
         if (shabSocket != null) {
             shabSocket.stop();
             shabSocket = null;
         }
 
+        if (locationServiceBound) {
+            unbindService(locationServiceConnection);
+            locationServiceBound = false;
+        }
+
         shabContext.clear();
-        lastLocalPositionSend = null;
 
         alreadyStarted = false;
         broadcastServiceStatus();
@@ -308,24 +265,8 @@ public class ShabService extends Service implements ShabSocketCallback {
 
     private synchronized void reconnect() {
         stop();
-        sleep(1500);
+        General.sleep(1500);
         start();
-    }
-
-    private void handleNewLocationFromProviders(Location location) {
-        Position localClientPosition = new Position();
-        localClientPosition.setLatitude(location.getLatitude());
-        localClientPosition.setLongitude(location.getLongitude());
-        localClientPosition.setAltitude(location.getAltitude());
-        shabContext.getLocalClient().setPosition(localClientPosition);
-
-        broadcastLocalPosition();
-
-        if (lastLocalPositionSend == null
-                || lastLocalPositionSend.plusSeconds(POSITION_SEND_INTERVAL).isBeforeNow()) {
-            sendLocalPosition();
-            lastLocalPositionSend = new DateTime();
-        }
     }
 
     private void sendLocalPosition() {
@@ -442,10 +383,28 @@ public class ShabService extends Service implements ShabSocketCallback {
         lastServerPingDateTime = new DateTime();
     }
 
-    private static void sleep(int delay) {
-        try {
-            Thread.sleep(delay);
-        } catch (InterruptedException ignored) {
-        }
+    private void showNotificationIcon() {
+        Intent activityIntent = new Intent(this, MainActivity.class);
+        activityIntent.setAction(Intent.ACTION_MAIN);
+        activityIntent.addCategory(Intent.CATEGORY_LAUNCHER);
+        activityIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+        PendingIntent pendingIntent = PendingIntent.getActivity(
+                getApplicationContext(),
+                0,
+                activityIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT);
+
+        Notification notification = new NotificationCompat.Builder(getApplicationContext())
+                .setContentTitle("SHAB Service")
+                .setContentText("SHAB is running")
+                .setAutoCancel(true)
+                .setOngoing(true)
+                .setContentIntent(pendingIntent)
+                .setWhen(System.currentTimeMillis())
+                .setSmallIcon(R.drawable.icon_notification)
+                .build();
+
+        startForeground(NOTIFICATION_ID, notification);
     }
 }

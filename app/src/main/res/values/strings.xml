@@ -10,6 +10,7 @@
     <string name="menu_main_about">About…</string>
 
     <string name="layout_loading">loading</string>
+    <string name="layout_main_infos_gps_status_label">GPS Status</string>
     <string name="layout_main_infos_latitude_label">Latitude</string>
     <string name="layout_main_infos_longitude_label">Longitude</string>
     <string name="layout_main_infos_altitude_label">Altitude</string>
